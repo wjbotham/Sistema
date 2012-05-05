@@ -1,12 +1,11 @@
 from math import ceil,sqrt
-from decimal import Decimal
 
 class Universe:
-    def __init__(self,G = "8.6493e-13"):
+    def __init__(self,G = 8.6493e-13):
         self.bodies = []
         self.time = 0
         # gravitational constant is in kilometers cubed per kilogram per hour squared
-        self.G = Decimal(G)
+        self.G = G
 
     def add_body(self,body):
         body.universe = self

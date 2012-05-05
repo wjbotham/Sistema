@@ -1,12 +1,11 @@
 from vector import Vector
 from math import sqrt,cos,sin,acos,pi,atan2
-from decimal import Decimal
 
 class Body:
     def __init__(self,name,mass,position=Vector(),velocity=Vector(),universe=None):
         self.name = name
         self.universe = universe
-        self.mass = Decimal(mass)
+        self.mass = mass
         self.position = position
         self.velocity = velocity
 
@@ -21,7 +20,6 @@ class Body:
         self.velocity = self.velocity.add(gravity_sum.divide(self.mass))
 
     def add_satellite(self,name,mass,orbit_radius,theta=0,phi=0,orbit_direction=0):
-        mass = Decimal(mass)
         rel_pos = Vector(orbit_radius,0,0).rotate(theta,phi)
         position = self.position.add(rel_pos)
         stan_grav_param = self.universe.G * (self.mass + mass)
@@ -38,14 +36,12 @@ class Body:
         orbit_direction: how much to rotate the satellite's current velocity direction
     '''
     def add_satellite_elliptic(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,orbit_direction=0):
-        mass = Decimal(mass)
-        semimajor_axis = Decimal(semimajor_axis)
-        semiminor_axis = semimajor_axis * Decimal(sqrt(1-eccentricity**2))
+        semiminor_axis = semimajor_axis * sqrt(1-eccentricity**2)
         
         #calculate position in ellipse
-        d_focus_to_center = (semimajor_axis**2 - semiminor_axis**2).sqrt()
-        x = Decimal(cos(progression))*semimajor_axis + d_focus_to_center
-        y = Decimal(sin(progression))*semiminor_axis
+        d_focus_to_center = sqrt(semimajor_axis**2 - semiminor_axis**2)
+        x = cos(progression)*semimajor_axis + d_focus_to_center
+        y = sin(progression)*semiminor_axis
         rel_pos = Vector(y,x,0).rotate(theta,phi)
         position = self.position.add(rel_pos)
 
@@ -54,8 +50,8 @@ class Body:
         rel_vel_magnitude = sqrt(stan_grav_param * (2/rel_pos.magnitude() - 1/semimajor_axis))
 
         # calculate orbit direction
-        dx = -Decimal(sin(progression))*semimajor_axis
-        dy = Decimal(cos(progression))*semiminor_axis
+        dx = -sin(progression)*semimajor_axis
+        dy = cos(progression)*semiminor_axis
         rel_vel_direction = Vector(dy,dx,0).normalize().rotate(theta,phi)
         
         rel_vel = rel_vel_direction.multiply(rel_vel_magnitude)
