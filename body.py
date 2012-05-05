@@ -18,24 +18,16 @@ class Body:
             if other != self:
                 gravity_sum = gravity_sum.add(self.attraction(other))
         self.velocity = self.velocity.add(gravity_sum.divide(self.mass))
-
-    def add_satellite(self,name,mass,orbit_radius,theta=0,phi=0,orbit_direction=0):
-        rel_pos = Vector(orbit_radius,0,0).rotate(theta,phi)
-        position = self.position.add(rel_pos)
-        stan_grav_param = self.universe.G * (self.mass + mass)
-        rel_vel = Vector(0,cos(orbit_direction),sin(orbit_direction)).rotate(theta,phi).multiply(sqrt(stan_grav_param / orbit_radius))
-        velocity = self.velocity.add(rel_vel)
-        self.universe.add_body(Body(name,mass,position,velocity))
-
+        
     '''
-        progression: the satellite's current progression around the ellipse
-            0 is at the positive semi-major axis, pi/2 is at the positive semi-minor axis
-            pi is at the negative semi-major axis, 3*pi/2 is at the negative semi-minor axis
-        theta: how far to rotate the entire ellipse within its 2D plane, around the z-axis; this changes the location of the axes
-        phi: how far to rotate the ellipse up into the third dimension
-        orbit_direction: how much to rotate the satellite's current velocity direction
+    progression: the satellite's current progression around the ellipse
+        0 is at the positive semi-major axis, pi/2 is at the positive semi-minor axis
+        pi is at the negative semi-major axis, 3*pi/2 is at the negative semi-minor axis
+    theta: how far to rotate the entire ellipse within its 2D plane, around the z-axis; this changes the location of the axes
+    phi: how far to rotate the ellipse up into the third dimension
+    orbit_direction: how much to rotate the satellite's current velocity direction
     '''
-    def add_satellite_elliptic(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,orbit_direction=0):
+    def add_satellite(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,orbit_direction=0):
         semiminor_axis = semimajor_axis * sqrt(1-eccentricity**2)
         
         #calculate position in ellipse

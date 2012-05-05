@@ -21,9 +21,7 @@ def main():
     theta = 0
     phi = pi/2
     orbit_direction = pi/2
-    #u.bodies[0].add_satellite("Venus",mass,orbit_radius,theta,phi,orbit_direction)
-    u.bodies[0].add_satellite_elliptic("Venus",mass,a,0.0068,pi/8)
-    #u.bodies[0].add_satellite("Countervenus",4.8685E24,108208930,0,pi/8,pi/8)
+    u.bodies[0].add_satellite("Venus",mass,a,0.0068,pi/8,0,0.000374276162)
     
     '''sol = Body("Sol",1.9891E30)
     jupiter = Body("Jupiter",1.8986E27,Vector(778547200,0,0),Vector(0,13.07*3600,0),sol)
