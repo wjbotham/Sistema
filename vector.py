@@ -30,11 +30,20 @@ class Vector:
     def normalize(self):
         return self.divide(self.magnitude())
 
-    def rotate(self,theta,phi):
-        ax = cos(theta)*self.x - sin(theta)*self.y
-        ay = sin(theta)*self.x + cos(theta)*self.y
+    def rotate(self,rx,ry,rz):
+        # rotation around z
+        ax = cos(rz)*self.x - sin(rz)*self.y
+        ay = sin(rz)*self.x + cos(rz)*self.y
         az = self.z
-        bx = cos(phi)*ax - sin(phi)*az
+        # rotation around y
+        bx = cos(ry)*ax - sin(ry)*az
         by = ay
-        bz = sin(phi)*ax + cos(phi)*az
-        return Vector(bx,by,bz)
+        bz = sin(ry)*ax + cos(ry)*az
+        # rotation around x
+        cx = bx
+        cy = cos(rx)*by - sin(rx)*bz
+        cz = sin(rx)*by + cos(rx)*bz
+        return Vector(cx,cy,cz)
+
+    def __repr__(self):
+        return "Vector(%s,%s,%s)" % (self.x,self.y,self.z)
