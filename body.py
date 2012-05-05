@@ -23,18 +23,19 @@ class Body:
     progression: the satellite's current progression around the ellipse
         0 is at the positive semi-major axis, pi/2 is at the positive semi-minor axis
         pi is at the negative semi-major axis, 3*pi/2 is at the negative semi-minor axis
-    theta: how far to rotate the entire ellipse within its 2D plane, around the z-axis; this changes the location of the axes
-    phi: how far to rotate the ellipse up into the third dimension
-    orbit_direction: how much to rotate the satellite's current velocity direction
+    theta: azimuthal rotation of orbit ("up" or "down", so to speak)
+    phi: rotation of orbit around z-axis ("left" or "right")
+    spin: change to direction of orbit (spin around x-axis applied before all other rotations)
     '''
-    def add_satellite(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,orbit_direction=0):
+    def add_satellite(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,spin=0):
         semiminor_axis = semimajor_axis * sqrt(1-eccentricity**2)
         
-        #calculate position in ellipse
+        # calculate position in ellipse
         d_focus_to_center = sqrt(semimajor_axis**2 - semiminor_axis**2)
         x = cos(progression)*semimajor_axis + d_focus_to_center
         y = sin(progression)*semiminor_axis
-        rel_pos = Vector(y,x,0).rotate(theta,phi)
+        # TODO: Make the spin apply before rotation-about-the-ellipse
+        rel_pos = Vector(y,x,0).rotate(theta,phi,spin)
         position = self.position.add(rel_pos)
 
         # calculate orbit speed
@@ -44,7 +45,7 @@ class Body:
         # calculate orbit direction
         dx = -sin(progression)*semimajor_axis
         dy = cos(progression)*semiminor_axis
-        rel_vel_direction = Vector(dy,dx,0).normalize().rotate(theta,phi)
+        rel_vel_direction = Vector(dy,dx,0).normalize().rotate(theta,phi,spin)
         
         rel_vel = rel_vel_direction.multiply(rel_vel_magnitude)
         velocity = self.velocity.add(rel_vel)

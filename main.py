@@ -3,7 +3,8 @@ sys.path.append("C:\\Users\\wajib\\Desktop\\Solar\\")
 from vector import Vector
 from universe import Universe
 from body import Body
-from math import pi
+import math
+tau = 2*math.pi
 
 ''' mass is in kilograms '''
 ''' distance is in kilometers '''
@@ -15,13 +16,13 @@ def main():
     u.add_body(sol)
 
     mass = 4.8685E24
-    orbit_radius = 108208930
-    a = 108942109
-    b = 107476259
-    theta = 0
-    phi = pi/2
-    orbit_direction = pi/2
-    u.bodies[0].add_satellite("Venus",mass,a,0.0068,pi/8,0,0.000374276162)
+    semimajor_axis = 108942109
+    eccentricity = 0.0068
+    u.bodies[0].add_satellite("Venus",
+                              mass,
+                              semimajor_axis,
+                              eccentricity,
+                              0,0,0,0)
     
     '''sol = Body("Sol",1.9891E30)
     jupiter = Body("Jupiter",1.8986E27,Vector(778547200,0,0),Vector(0,13.07*3600,0),sol)
