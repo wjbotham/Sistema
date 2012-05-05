@@ -30,19 +30,20 @@ class Vector:
     def normalize(self):
         return self.divide(self.magnitude())
 
-    def rotate(self,rx,ry,rz):
-        # rotation around z
-        ax = cos(rz)*self.x - sin(rz)*self.y
-        ay = sin(rz)*self.x + cos(rz)*self.y
-        az = self.z
-        # rotation around y
-        bx = cos(ry)*ax - sin(ry)*az
+    # http://upload.wikimedia.org/wikipedia/commons/4/4f/3D_Spherical.svg
+    def rotate(self,theta,phi,spin):
+        # rotation around x-axis
+        ax = self.x
+        ay = cos(spin)*self.y - sin(spin)*self.z
+        az = sin(spin)*self.y + cos(spin)*self.z
+        # rotation about y-axis (azimuthal)
+        bx = sin(theta)*az + cos(theta)*ax
         by = ay
-        bz = sin(ry)*ax + cos(ry)*az
-        # rotation around x
-        cx = bx
-        cy = cos(rx)*by - sin(rx)*bz
-        cz = sin(rx)*by + cos(rx)*bz
+        bz = cos(theta)*az - sin(theta)*ax
+        # rotation around z-axis
+        cx = cos(phi)*bx - sin(phi)*by
+        cy = sin(phi)*bx + cos(phi)*by
+        cz = bz
         return Vector(cx,cy,cz)
 
     def __repr__(self):
