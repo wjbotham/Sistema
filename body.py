@@ -25,7 +25,6 @@ class Body:
         pi is at the negative semi-major axis, 3*pi/2 is at the negative semi-minor axis
     theta: azimuthal rotation of orbit ("up" or "down", so to speak)
     phi: rotation of orbit around z-axis ("left" or "right")
-    spin: change to direction of orbit (spin around x-axis applied before all other rotations)
     '''
     def add_satellite(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,reverse_orbit=False):
         semiminor_axis = semimajor_axis * sqrt(1-eccentricity**2)

@@ -3,18 +3,36 @@ sys.path.append("C:\\Users\\wajib\\Desktop\\Solar\\")
 from vector import Vector
 from universe import Universe
 from body import Body
+from random import random
 import math
 tau = 2*math.pi
 
 ''' mass is in kilograms '''
 ''' distance is in kilometers '''
 ''' velocity is in kilometers per minute '''
-        
+
+def add_random_planet(parent):
+    mass = 1E+23 + random()*1E+25
+    # sma = semi-major axis
+    sma = 5E+7 + min([random() for i in range(5)])*5E+8
+    # ecc = eccentricity
+    ecc = min([random() for i in range(40)])
+    # prog = progression
+    prog = random()*tau
+    theta = min([random()/4 for i in range(50)])*tau
+    phi = random()*tau
+    reverse_orbit = (random() < 0.001)
+    parent.add_satellite("Test "+str(len(parent.universe.bodies)),mass,sma,ecc,prog,theta,phi,reverse_orbit)
+    
 def main():
     u = Universe()
-    sol = Body("Sol",1.9891E30)
+    sol = Body("Sol",5E29+random()*5E30)
     u.add_body(sol)
 
+    for i in range(3):
+        add_random_planet(sol)
+
+    '''
     mass = 4.8685E24
     semimajor_axis = 108942109
     eccentricity = 0.0068
@@ -24,7 +42,7 @@ def main():
                               eccentricity,
                               2*tau/3,3*tau/8,3*tau/8,True)
     
-    '''sol = Body("Sol",1.9891E30)
+    sol = Body("Sol",1.9891E30)
     jupiter = Body("Jupiter",1.8986E27,Vector(778547200,0,0),Vector(0,13.07*3600,0),sol)
     earth = Body("Earth",5.9736E24,Vector(149598261,0,0),Vector(0,29.78*3600,0),sol)
     #luna = Body("Luna",7.3477E22,Vector(384399,0,0),Vector(0,0,1.022*60*60),earth)
@@ -39,11 +57,10 @@ def main():
         u.add_body(body)'''
     distances = []
     u.report()
-    for i in range(12000):
+    for i in range(10000):
         u.pass_hour()
-        distances.append(u.bodies[0].position.subtract(u.bodies[1].position).magnitude())
-        if i%1500 == 1499:
-            print('%.2E' % (i+1),'%.3E' % min(distances),'%.3E' % (sum(distances)/len(distances)),'%.3E' % max(distances))
+        if i%1000 == 999:
+            u.report()
 
 if __name__ == "__main__":
     main()
