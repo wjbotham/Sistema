@@ -27,15 +27,14 @@ class Body:
     phi: rotation of orbit around z-axis ("left" or "right")
     spin: change to direction of orbit (spin around x-axis applied before all other rotations)
     '''
-    def add_satellite(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,spin=0):
+    def add_satellite(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,reverse_orbit=False):
         semiminor_axis = semimajor_axis * sqrt(1-eccentricity**2)
         
         # calculate position in ellipse
         d_focus_to_center = sqrt(semimajor_axis**2 - semiminor_axis**2)
         x = cos(progression)*semimajor_axis + d_focus_to_center
         y = sin(progression)*semiminor_axis
-        # TODO: Make the spin apply before rotation-about-the-ellipse
-        rel_pos = Vector(y,x,0).rotate(theta,phi,spin)
+        rel_pos = Vector(y,x,0).rotate(theta,phi)
         position = self.position.add(rel_pos)
 
         # calculate orbit speed
@@ -45,7 +44,9 @@ class Body:
         # calculate orbit direction
         dx = -sin(progression)*semimajor_axis
         dy = cos(progression)*semiminor_axis
-        rel_vel_direction = Vector(dy,dx,0).normalize().rotate(theta,phi,spin)
+        rel_vel_direction = Vector(dy,dx,0).normalize().rotate(theta,phi)
+        if reverse_orbit:
+            rel_vel_direction = rel_vel_direction.neg()
         
         rel_vel = rel_vel_direction.multiply(rel_vel_magnitude)
         velocity = self.velocity.add(rel_vel)
@@ -56,9 +57,6 @@ class Body:
         magnitude = (self.universe.G * self.mass * other.mass) / rel_pos.dot_product()
         unit_vector = rel_pos.normalize()
         return unit_vector.multiply(magnitude)
-
-    def ellipse_acceleration(self,other,a,b,t):
-        return Vector(-a*cos(t),-b*sin(t),0)
 
     def get_angle_phi(self,other):
         rel_pos = self.position.subtract(other.position)

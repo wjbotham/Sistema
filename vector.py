@@ -31,20 +31,13 @@ class Vector:
         return self.divide(self.magnitude())
 
     # http://upload.wikimedia.org/wikipedia/commons/4/4f/3D_Spherical.svg
-    def rotate(self,theta,phi,spin):
-        # rotation around x-axis
-        ax = self.x
-        ay = cos(spin)*self.y - sin(spin)*self.z
-        az = sin(spin)*self.y + cos(spin)*self.z
+    def rotate(self,theta,phi):
+        x,y,z = self.x,self.y,self.z
         # rotation about y-axis (azimuthal)
-        bx = sin(theta)*az + cos(theta)*ax
-        by = ay
-        bz = cos(theta)*az - sin(theta)*ax
+        x,y,z = sin(theta)*z + cos(theta)*x, y, cos(theta)*z - sin(theta)*x
         # rotation around z-axis
-        cx = cos(phi)*bx - sin(phi)*by
-        cy = sin(phi)*bx + cos(phi)*by
-        cz = bz
-        return Vector(cx,cy,cz)
+        x,y,z = cos(phi)*x - sin(phi)*y, sin(phi)*x + cos(phi)*y, z
+        return Vector(x,y,z)
 
     def __repr__(self):
         return "Vector(%s,%s,%s)" % (self.x,self.y,self.z)

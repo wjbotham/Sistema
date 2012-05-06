@@ -22,7 +22,7 @@ def main():
                               mass,
                               semimajor_axis,
                               eccentricity,
-                              0,0,0,0)
+                              2*tau/3,3*tau/8,3*tau/8,True)
     
     '''sol = Body("Sol",1.9891E30)
     jupiter = Body("Jupiter",1.8986E27,Vector(778547200,0,0),Vector(0,13.07*3600,0),sol)
@@ -39,10 +39,10 @@ def main():
         u.add_body(body)'''
     distances = []
     u.report()
-    for i in range(8000):
+    for i in range(12000):
         u.pass_hour()
         distances.append(u.bodies[0].position.subtract(u.bodies[1].position).magnitude())
-        if i%1000 == 999:
+        if i%1500 == 1499:
             print('%.2E' % (i+1),'%.3E' % min(distances),'%.3E' % (sum(distances)/len(distances)),'%.3E' % max(distances))
 
 if __name__ == "__main__":
