@@ -18,7 +18,7 @@ class Body:
             if other != self:
                 gravity_sum = gravity_sum.add(self.attraction(other))
         self.velocity = self.velocity.add(gravity_sum.divide(self.mass))
-        
+         
     '''
     progression: the satellite's current progression around the ellipse
         0 is at the positive semi-major axis, pi/2 is at the positive semi-minor axis
