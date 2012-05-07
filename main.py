@@ -9,11 +9,10 @@ def main():
     u = generate_system()
 
     distances = []
-    u.report()
-    #for i in range(1000):
-    #    u.pass_hour()
-    #    if i%100 == 99:
-    #        u.report()
+    u.describe_system()
+    for i in range(10):
+        u.pass_hour()
+        u.describe_system()
 
 if __name__ == "__main__":
     main()
