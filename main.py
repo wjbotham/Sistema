@@ -1,4 +1,6 @@
 import sys
+# TODO: Can this next line be removed?  I am dumb at Python, it seems...
+# http://code.activestate.com/recipes/474083-get-the-path-of-the-currently-executing-python-scr/
 sys.path.append("C:\\Users\\wajib\\Desktop\\Solar\\")
 from vector import Vector
 from universe import Universe
