@@ -20,8 +20,8 @@ class Universe:
                 body.apply_gravity()
 
     def travel_time(self,b1,b2,accel):
-        velocity_diff = b1.velocity.subtract(b2.velocity).magnitude()
-        distance = b1.position.subtract(b2.position).magnitude()
+        velocity_diff = (b1.velocity - b2.velocity).magnitude()
+        distance = (b1.position - b2.position).magnitude()
         return ceil((velocity_diff/accel)+(distance/sqrt(accel*distance/4)))
 
     def describe_system(self):
@@ -33,7 +33,7 @@ class Universe:
         print(sun.name+": mass="+('%.2E' % sun.mass))
         for i in range(1,len(self.bodies)):
             bodyi = self.bodies[i]
-            dist = self.bodies[0].position.subtract(bodyi.position).magnitude()
-            orbit_speed = self.bodies[0].velocity.subtract(bodyi.velocity).magnitude()
+            dist = (self.bodies[0].position - bodyi.position).magnitude()
+            orbit_speed = (self.bodies[0].velocity - bodyi.velocity).magnitude()
             print(bodyi.name+": dist=("+('%.2E' % dist)+"), orbit speed=("+('%.2E' % orbit_speed)+"), mass="+('%.2E' % bodyi.mass))
         print()
