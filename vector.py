@@ -18,7 +18,7 @@ class Vector:
         if c == Vector:
             # dot product
             return (self.x*other.x) + (self.y*other.y) + (self.z*other.z)
-        elif c == int or c == float:
+        else:
             # scalar
             return Vector(self.x*other,self.y*other,self.z*other)
     def __rmul__(self,other):
