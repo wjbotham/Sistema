@@ -5,33 +5,36 @@ class Vector:
         self.x,self.y,self.z = x,y,z
 
     def magnitude(self):
-        return sqrt(self.dot_product())
+        return sqrt(self * self)
 
-    def dot_product(self,other=None):
-        if other == None:
-            other = self
-        return (self.x*other.x) + (self.y*other.y) + (self.z*other.z)
-
-    def add(self,other):
+    def __add__(self,other):
         return Vector(self.x+other.x,self.y+other.y,self.z+other.z)
 
-    def subtract(self,other):
+    def __sub__(self,other):
         return self.add(other.neg())
 
-    def multiply(self,scalar):
-        return Vector(self.x*scalar,self.y*scalar,self.z*scalar)
+    def __mul__(self,other):
+        c = other.__class__
+        if c == Vector:
+            # dot product
+            return (self.x*other.x) + (self.y*other.y) + (self.z*other.z)
+        elif c == int or c == float:
+            # scalar
+            return Vector(self.x*other,self.y*other,self.z*other)
+    def __rmul__(self,other):
+        return self.__mul__(other)
 
-    def divide(self,scalar):
+    def __truediv__(self,scalar):
         return Vector(self.x/scalar,self.y/scalar,self.z/scalar)
     
-    def neg(self):
+    def __neg__(self):
         return Vector(-self.x,-self.y,-self.z)
 
-    def normalize(self):
-        return self.divide(self.magnitude())
+    def normalized(self):
+        return self / self.magnitude()
 
     # http://upload.wikimedia.org/wikipedia/commons/4/4f/3D_Spherical.svg
-    def rotate(self,theta,phi):
+    def rotated(self,theta,phi):
         x,y,z = self.x,self.y,self.z
         # rotation about y-axis (azimuthal)
         x,y,z = sin(theta)*z + cos(theta)*x, y, cos(theta)*z - sin(theta)*x
