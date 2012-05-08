@@ -10,14 +10,11 @@ class Body:
         self.velocity = velocity
 
     def apply_velocity(self):
-        self.position = self.position.add(self.velocity)
+        self.position += self.velocity
 
     def apply_gravity(self):
-        gravity_sum = Vector()
-        for other in self.universe.bodies:
-            if other != self:
-                gravity_sum = gravity_sum.add(self.attraction(other))
-        self.velocity = self.velocity.add(gravity_sum.divide(self.mass))
+        gravity_sum = sum(self.attraction(other) for other in self.universe.bodies if other != self, Vector(0,0,0))
+        self.velocity += gravity_sum / self.mass
          
     '''
     progression: the satellite's current progression around the ellipse
@@ -43,28 +40,28 @@ class Body:
         # calculate orbit direction
         dx = -sin(progression)*semimajor_axis
         dy = cos(progression)*semiminor_axis
-        rel_vel_direction = Vector(dy,dx,0).normalize().rotate(theta,phi)
+        rel_vel_direction = Vector(dy,dx,0).normalized().rotated(theta,phi)
         if reverse_orbit:
             rel_vel_direction = rel_vel_direction.neg()
         
-        rel_vel = rel_vel_direction.multiply(rel_vel_magnitude)
-        velocity = self.velocity.add(rel_vel)
+        rel_vel = rel_vel_direction * rel_vel_magnitude
+        velocity = self.velocity + rel_vel
         self.universe.add_body(Body(name,mass,position,velocity))
 
     def attraction(self,other):
         rel_pos = other.position.subtract(self.position)
-        magnitude = (self.universe.G * self.mass * other.mass) / rel_pos.dot_product()
-        unit_vector = rel_pos.normalize()
+        magnitude = (self.universe.G * self.mass * other.mass) / (rel_pos*rel_pos)
+        unit_vector = rel_pos.normalized()
         return unit_vector.multiply(magnitude)
 
     def get_angle_phi(self,other):
-        rel_pos = self.position.subtract(other.position)
-        unit_vector = rel_pos.normalize()
+        rel_pos = self.position - other.position
+        unit_vector = rel_pos.normalized()
         return acos(unit_vector.z/rel_pos.magnitude())/pi
 
     def get_angle_theta(self,other):
-        unit_vector = self.position.subtract(other.position).normalize()
+        unit_vector = (self.position - other.position).normalized()
         return atan2(unit_vector.y,unit_vector.x)/pi
 
     def get_distance(self,other):
-        return self.position.subtract(other.position).magnitude()
+        return (self.position - other.position).magnitude()
