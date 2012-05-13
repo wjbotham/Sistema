@@ -13,7 +13,7 @@ class Body:
         self.position += self.velocity
 
     def apply_gravity(self):
-        gravity_sum = sum((self.attraction(other) for other in self.universe.bodies if other != self), Vector(0,0,0))
+        gravity_sum = sum(self.attraction(other) for other in self.universe.bodies if other != self)
         self.velocity += gravity_sum / self.mass
          
     '''
@@ -42,7 +42,7 @@ class Body:
         dy = cos(progression)*semiminor_axis
         rel_vel_direction = Vector(dy,dx,0).normalized().rotated(theta,phi)
         if reverse_orbit:
-            rel_vel_direction = rel_vel_direction.neg()
+            rel_vel_direction = -rel_vel_direction
         
         rel_vel = rel_vel_direction * rel_vel_magnitude
         velocity = self.velocity + rel_vel

@@ -8,7 +8,12 @@ class Vector:
         return sqrt(self * self)
 
     def __add__(self,other):
+        if other == 0:
+            # makes it possible to sum(vectors) with default init=0
+            return self
         return Vector(self.x+other.x,self.y+other.y,self.z+other.z)
+    def __radd__(self,other):
+        return self.__add__(other)
 
     def __sub__(self,other):
         return self + (-other)
