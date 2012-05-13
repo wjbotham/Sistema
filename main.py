@@ -10,7 +10,9 @@ def main():
     u.generate_view_thread()
 
     for i in range(10000):
-        u.pass_hour(24)
+        u.pass_hour(1)
+        for j in range(1000000):
+            None
 
 if __name__ == "__main__":
     main()
