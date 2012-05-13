@@ -5,6 +5,7 @@ import sys
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
+LIGHT_GRAY = (127,127,127)
 
 class View:
     def __init__(self,universe):
@@ -83,17 +84,17 @@ class View:
         else:
             self.origin = self.universe.center_of_mass()
         self.window.fill(BLACK)
-        text = self.font.render("%.2E" % self.km_radius, True, WHITE, BLACK)
+        text = self.font.render("%.2E" % self.km_radius, True, LIGHT_GRAY, BLACK)
         textRect = text.get_rect()
         textRect.centerx,textRect.centery = (16,7)
         self.window.blit(text, textRect)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             pos = self.km_to_px(body.position.x,body.position.y)
-            pygame.draw.circle(self.window, WHITE, pos, 2, 1)
-            text = self.font.render(body.name, True, WHITE, BLACK)
+            text = self.font.render(body.name, True, LIGHT_GRAY, BLACK)
             textRect = text.get_rect()
             textRect.centerx,textRect.centery = pos
             textRect.centery += 8
             self.window.blit(text, textRect)
+            pygame.draw.circle(self.window, WHITE, pos, 2, 1)
         #draw it to the screen
         pygame.display.flip()
