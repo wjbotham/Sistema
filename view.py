@@ -37,7 +37,14 @@ class View:
 
     def update(self):
         self.window.fill((0,0,0))
+        basicFont = pygame.font.SysFont(None, 12)
         for body in self.universe.bodies:
-            pygame.draw.circle(self.window, (255, 255, 255), self.math_to_draw(body.position.x,body.position.y), 2, 1)
+            pos = self.math_to_draw(body.position.x,body.position.y)
+            pygame.draw.circle(self.window, (255,255,255), pos, 2, 1)
+            text = basicFont.render(body.name, True, (255,255,255), (0,0,0))
+            textRect = text.get_rect()
+            textRect.centerx,textRect.centery = pos
+            textRect.centery += 8
+            self.window.blit(text, textRect)
         #draw it to the screen
         pygame.display.flip()
