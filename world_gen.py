@@ -43,7 +43,7 @@ def add_gas_giant(parent):
     
 def add_rocky_planet(parent):
     mass_range = (78,83)
-    sma_range = (25,28)
+    sma_range = (25.5,28.5)
     ecc_range = (-6.5,-2)
     theta_range = (-7,-5)
     add_object(parent,"RP",mass_range,sma_range,ecc_range,theta_range)
@@ -55,10 +55,10 @@ def add_rocky_planet(parent):
     
 def add_moon(parent):
     mass_range = (65,76)
-    sma_range = (18,20)
+    sma_range = (18,19)
     ecc_range = (-6.5,-2)
     theta_range = (-7,-5)
-    add_object(parent,"M",mass_range,sma_range,ecc_range,theta_range)
+    add_object(parent,"MN",mass_range,sma_range,ecc_range,theta_range)
 
 def exprange(r):
     a,b = r
@@ -72,5 +72,6 @@ def add_object(parent,prefix,mass_range,sma_range,ecc_range,theta_range,reverse_
     theta = exprange(theta_range)*tau
     phi = random()*tau
     reverse_orbit = (random() < reverse_odds)
-    parent.add_satellite(prefix+str(len(parent.universe.bodies)),mass,sma,ecc,prog,theta,phi,reverse_orbit)
+    index = list(map(lambda b: b.name[:2], parent.universe.bodies)).count(prefix)+1
+    parent.add_satellite("%s%d"%(prefix,index),mass,sma,ecc,prog,theta,phi,reverse_orbit)
     
