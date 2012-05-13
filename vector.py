@@ -11,7 +11,7 @@ class Vector:
         return Vector(self.x+other.x,self.y+other.y,self.z+other.z)
 
     def __sub__(self,other):
-        return self.add(other.neg())
+        return self + (-other)
 
     def __mul__(self,other):
         c = other.__class__

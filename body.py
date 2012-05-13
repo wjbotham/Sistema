@@ -13,7 +13,7 @@ class Body:
         self.position += self.velocity
 
     def apply_gravity(self):
-        gravity_sum = sum(self.attraction(other) for other in self.universe.bodies if other != self, Vector(0,0,0))
+        gravity_sum = sum((self.attraction(other) for other in self.universe.bodies if other != self), Vector(0,0,0))
         self.velocity += gravity_sum / self.mass
          
     '''
@@ -30,8 +30,8 @@ class Body:
         d_focus_to_center = sqrt(semimajor_axis**2 - semiminor_axis**2)
         x = cos(progression)*semimajor_axis + d_focus_to_center
         y = sin(progression)*semiminor_axis
-        rel_pos = Vector(y,x,0).rotate(theta,phi)
-        position = self.position.add(rel_pos)
+        rel_pos = Vector(y,x,0).rotated(theta,phi)
+        position = self.position + rel_pos
 
         # calculate orbit speed
         stan_grav_param = self.universe.G * (self.mass + mass)
@@ -49,10 +49,10 @@ class Body:
         self.universe.add_body(Body(name,mass,position,velocity))
 
     def attraction(self,other):
-        rel_pos = other.position.subtract(self.position)
+        rel_pos = other.position - self.position
         magnitude = (self.universe.G * self.mass * other.mass) / (rel_pos*rel_pos)
         unit_vector = rel_pos.normalized()
-        return unit_vector.multiply(magnitude)
+        return unit_vector * magnitude
 
     def get_angle_phi(self,other):
         rel_pos = self.position - other.position
