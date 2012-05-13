@@ -1,6 +1,5 @@
 from universe import Universe
 from world_gen import generate_system
-from view import View
 
 ''' mass is in kilograms '''
 ''' distance is in kilometers '''
@@ -8,15 +7,10 @@ from view import View
  
 def main():
     u = generate_system()
-    v = View(u)
-    
-    distances = []
-    #u.describe_system()
+    u.generate_view_thread()
+
     for i in range(10000):
-        u.pass_hour(1)
-        v.update()
-        #u.describe_system()
-    v.close()
+        u.pass_hour(24)
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,7 @@
 from math import ceil,sqrt
+from view import View
+from threading import Thread
+from vector import Vector
 
 class Universe:
     def __init__(self,G = 8.6493e-13):
@@ -6,6 +9,7 @@ class Universe:
         self.time = 0
         # gravitational constant is in kilometers cubed per kilogram per hour squared
         self.G = G
+        self.view = None
 
     def add_body(self,body):
         body.universe = self
@@ -18,11 +22,28 @@ class Universe:
                 body.apply_velocity()
             for body in self.bodies:
                 body.apply_gravity()
+        if self.view:
+            self.view.update()
+
+    def center_of_mass(self):
+        total_mass = sum(body.mass for body in self.bodies)
+        if total_mass == 0:
+            return Vector(0,0,0)
+        return sum((body.position * body.mass) for body in self.bodies)/total_mass
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
         distance = (b1.position - b2.position).magnitude()
         return ceil((velocity_diff/accel)+(distance/sqrt(accel*distance/4)))
+
+    def generate_view_thread(self):
+        t = Thread(target=self.ui_loop)
+        t.start()
+
+    def ui_loop(self):
+        self.view = View(self)
+        self.view.ui_loop()
+        self.view = None
 
     def describe_system(self):
         plural = "s"
