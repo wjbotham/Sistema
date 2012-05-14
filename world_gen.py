@@ -43,12 +43,12 @@ def add_gas_giant(parent):
     
 def add_rocky_planet(parent):
     mass_range = (78,83)
-    sma_range = (25.5,28.5)
+    sma_range = (26,29)
     ecc_range = (-6.5,-2)
     theta_range = (-7,-5)
     add_object(parent,"RP",mass_range,sma_range,ecc_range,theta_range)
     idx = len(parent.universe.bodies)-1
-    for i in range(randint(0,1)+randint(0,1)):
+    for i in range(randint(0,1)):
         add_moon(parent.universe.bodies[idx])
 
 #def add_dwarf_planet(parent):
