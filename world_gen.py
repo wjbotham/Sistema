@@ -12,7 +12,7 @@ def generate_system():
         add_gas_giant(sun)
     for i in range(1 + randint(0,3) + randint(0,3)):
         add_rocky_planet(sun)
-    u.bodies.sort(key=lambda obj:obj.get_distance(sun))
+    u.bodies.sort(key=lambda obj:obj.distance(sun))
     return u
 
 def add_gas_giant(parent):

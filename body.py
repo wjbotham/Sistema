@@ -57,14 +57,14 @@ class Body:
         unit_vector = rel_pos.normalized()
         return unit_vector * magnitude
 
-    def get_angle_phi(self,other):
+    def angle_phi(self,other):
         rel_pos = self.position - other.position
         unit_vector = rel_pos.normalized()
         return acos(unit_vector.z/rel_pos.magnitude())/pi
 
-    def get_angle_theta(self,other):
+    def angle_theta(self,other):
         unit_vector = (self.position - other.position).normalized()
         return atan2(unit_vector.y,unit_vector.x)/pi
 
-    def get_distance(self,other):
+    def distance(self,other):
         return (self.position - other.position).magnitude()

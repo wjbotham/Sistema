@@ -78,7 +78,7 @@ class View:
         subject = self.find_subject_body(event)
         if subject:
             if self.range_sel:
-                print("%.2E" % subject.get_distance(self.range_sel))
+                print("%.2E" % subject.distance(self.range_sel))
                 self.range_sel = None
             else:
                 self.range_sel = subject
@@ -89,7 +89,7 @@ class View:
         for body in self.universe.bodies:
             b_x,b_y = self.km_to_px(body.position.x,body.position.y)
             dist = sqrt((ev_x-b_x)**2 + (ev_y-b_y)**2)
-            if dist <= 10:
+            if dist <= 12:
                 candidates.append(body)                    
         if len(candidates) > 0:
             return max(candidates,key=lambda body: body.mass)
