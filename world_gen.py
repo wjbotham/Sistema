@@ -15,22 +15,6 @@ def generate_system():
     u.bodies.sort(key=lambda obj:obj.get_distance(sun))
     return u
 
-'''
-def add_object(parent):
-    r1 = random()*2
-    mass = pow(10,log(parent.mass,10)-14 + (r1+random())/3*11.5)
-    sma = 7*pow(10,5 + (r1+random())/3*4)
-    if mass <= 1 or sma <= 1:
-        return
-    ecc = min([random() for i in range(40)])
-    prog = random()*tau
-    theta = min([random()/4 for i in range(50)])*tau
-    phi = random()*tau
-    reverse_orbit = (random() < 0.001)
-    parent.add_satellite("SB"+str(len(parent.universe.bodies)),mass,sma,ecc,prog,theta,phi,reverse_orbit)
-    add_object(parent.universe.bodies[len(parent.universe.bodies)-1])
-'''
-
 def add_gas_giant(parent):
     mass_range = (86,91)
     sma_range = (29,32.5)
