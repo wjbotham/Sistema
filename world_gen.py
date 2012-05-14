@@ -71,8 +71,8 @@ def add_object(parent,prefix,mass_range,sma_range,ecc_range,theta_range,reverse_
     prog = random()*tau
     theta = exprange(theta_range)*tau
     phi = random()*tau
-    # TODO incl_angle = random()*tau
+    incl_angle = random()*tau
     reverse_orbit = (random() < reverse_odds)
     index = list(map(lambda b: b.name[:2], parent.universe.bodies)).count(prefix)+1
-    parent.add_satellite("%s%d"%(prefix,index),mass,sma,ecc,prog,theta,phi,'''TODO incl_angle,'''reverse_orbit)
+    parent.add_satellite("%s%d"%(prefix,index),mass,sma,ecc,prog,theta,phi,incl_angle,reverse_orbit)
     

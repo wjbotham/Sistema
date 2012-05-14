@@ -26,15 +26,14 @@ class Body:
         basically http://en.wikipedia.org/wiki/Longitude_of_the_ascending_node
     reverse_orbit: 
     '''
-    def add_satellite(self,name,mass,semimajor_axis,eccentricity=0,progression=0,theta=0,phi=0,'''TODO incl_angle,'''reverse_orbit=False):
+    def add_satellite(self,name,mass,semimajor_axis,eccentricity,progression,theta,phi,incl_angle,reverse_orbit=False):
         semiminor_axis = semimajor_axis * sqrt(1-eccentricity**2)
         
         # calculate position in ellipse
         d_focus_to_center = sqrt(semimajor_axis**2 - semiminor_axis**2)
         x = cos(progression)*semimajor_axis + d_focus_to_center
         y = sin(progression)*semiminor_axis
-        # TODO rel_pos = Vector(y,x,0).rotated(0,incl_angle).rotated(theta,phi-incl_angle)
-        rel_pos = Vector(y,x,0).rotated(theta,phi)
+        rel_pos = Vector(y,x,0).rotated(0,incl_angle).rotated(theta,phi-incl_angle)
         position = self.position + rel_pos
 
         # calculate orbit speed
@@ -44,8 +43,7 @@ class Body:
         # calculate orbit direction
         dx = -sin(progression)*semimajor_axis
         dy = cos(progression)*semiminor_axis
-        # TODO rel_vel_direction = Vector(dy,dx,0).normalized().rotated(0,incl_angle).rotated(theta,phi-incl_angle)
-        rel_vel_direction = Vector(dy,dx,0).normalized().rotated(theta,phi)
+        rel_vel_direction = Vector(dy,dx,0).normalized().rotated(0,incl_angle).rotated(theta,phi-incl_angle)
         if reverse_orbit:
             rel_vel_direction = -rel_vel_direction
         
