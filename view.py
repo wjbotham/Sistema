@@ -52,6 +52,7 @@ class View:
         return self._range_sel
     def set_range_sel(self,range_sel):
         self._range_sel = range_sel
+        self.info_panel.update_displayed_body(self._range_sel)
         self.update()
     range_sel = property(get_range_sel,set_range_sel)
 
@@ -87,9 +88,7 @@ class View:
         if subject:
             if self.range_sel:
                 print("%.2E" % subject.distance(self.range_sel))
-                self.range_sel = None
-            else:
-                self.range_sel = subject
+            self.range_sel = subject
 
     def find_subject_body(self,event):
         ev_x,ev_y = event.pos
