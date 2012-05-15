@@ -143,7 +143,10 @@ class View:
                     textRect.centerx,textRect.centery = pos
                     textRect.centery += 19
                     self.window.blit(text, textRect)
-            pygame.draw.circle(self.window, WHITE, pos, 2, 0)
+            rel_height = ((body.position.z-self.trackee.position.z)/self.km_radius)+0.5
+            rel_height = max(0,min(1,rel_height))
+            height_color = tuple(map(lambda n:n*rel_height,body.color))
+            pygame.draw.circle(self.window, height_color, pos, 2, 0)
             if body == self.range_sel:
                 pygame.draw.circle(self.window, GREEN, pos, 5, 1)
         #draw it to the screen
