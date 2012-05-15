@@ -133,11 +133,17 @@ class View:
             textRect.centerx,textRect.centery = pos
             textRect.centery += 8
             self.window.blit(text, textRect)
-            text = self.font.render("%.2E" % body.position.z, True, LIGHT_GRAY, BLACK)
-            textRect = text.get_rect()
-            textRect.centerx,textRect.centery = pos
-            textRect.centery += 19
-            self.window.blit(text, textRect)
+            if body != self.trackee:
+                x_offset = body.position.x-self.trackee.position.x
+                y_offset = body.position.y-self.trackee.position.y
+                z_offset = body.position.z-self.trackee.position.z
+                xy_dist = sqrt(x_offset**2 + y_offset**2)
+                if abs(z_offset) >= xy_dist/10:
+                    text = self.font.render("%.2E" % z_offset, True, LIGHT_GRAY, BLACK)
+                    textRect = text.get_rect()
+                    textRect.centerx,textRect.centery = pos
+                    textRect.centery += 19
+                    self.window.blit(text, textRect)
             pygame.draw.circle(self.window, WHITE, pos, 2, 0)
             if body == self.range_sel:
                 pygame.draw.circle(self.window, GREEN, pos, 5, 1)
