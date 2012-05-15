@@ -2,7 +2,7 @@ import pygame
 from vector import Vector
 from math import sqrt
 from threading import Thread
-import tkinter
+from command_interface import CommandInterface
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -25,15 +25,7 @@ class View:
         self.update()
 
         # all of this should be abstracted into a ControlPanel class or something
-        self.info_panel = tkinter.Tk()
-        self.info_panel.protocol("WM_DELETE_WINDOW", lambda: None)
-        self.info_frame = tkinter.Frame(self.info_panel, width=256, height=512)
-        self.info_frame.pack_propagate(0)
-        self.info_frame.pack()
-        self.info_panel.body_name = tkinter.Label(self.info_frame, text="Hello, World!", anchor=tkinter.W)
-        self.info_panel.body_name.pack(fill=tkinter.X)
-        self.info_panel.body_mass = tkinter.Label(self.info_frame, text="Hello, World!", anchor=tkinter.W)
-        self.info_panel.body_mass.pack(fill=tkinter.X)
+        self.info_panel = CommandInterface()
 
     def get_origin(self):
         return self._origin
@@ -52,8 +44,7 @@ class View:
         return self._trackee
     def set_trackee(self,trackee):
         self._trackee = trackee
-        self.info_panel.body_mass.config(text="Mass: %.2E kg" % self._trackee.mass)
-        self.info_panel.body_name.config(text="Name: "+self._trackee.name)
+        self.info_panel.update_displayed_body(self._trackee)
         self.update()
     trackee = property(get_trackee,set_trackee)
 
