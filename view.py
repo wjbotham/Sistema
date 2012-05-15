@@ -1,7 +1,8 @@
 import pygame
 from vector import Vector
 from math import sqrt
-import sys
+from threading import Thread
+import tkinter
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -22,6 +23,10 @@ class View:
         self._origin = universe.center_of_mass()
         self._km_radius = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05
         self.update()
+        
+        self.info_panel = tkinter.Tk()
+        w = tkinter.Label(self.info_panel, text="Hello, world!")
+        w.pack()
 
     def get_origin(self):
         return self._origin
@@ -51,6 +56,8 @@ class View:
     range_sel = property(get_range_sel,set_range_sel)
 
     def ui_loop(self):
+        info_panel_thread = Thread(target=self.info_panel.mainloop)
+        info_panel_thread.start()
         #input handling (somewhat boilerplate code):
         while True: 
             for event in pygame.event.get(): 

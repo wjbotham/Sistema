@@ -43,7 +43,6 @@ class Universe:
     def ui_loop(self):
         self.view = View(self)
         self.view.ui_loop()
-        self.view = None
 
     def describe_system(self):
         plural = "s"
