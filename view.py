@@ -23,15 +23,17 @@ class View:
         self._origin = universe.center_of_mass()
         self._km_radius = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05
         self.update()
-        
+
+        # all of this should be abstracted into a ControlPanel class or something
         self.info_panel = tkinter.Tk()
         self.info_panel.protocol("WM_DELETE_WINDOW", lambda: None)
-        self.info_frame = tkinter.Frame(width=256, height=256)
+        self.info_frame = tkinter.Frame(self.info_panel, width=256, height=512)
+        self.info_frame.pack_propagate(0)
         self.info_frame.pack()
-        self.info_panel.body_name = tkinter.Label(self.info_frame, text="Hello, World!")
-        self.info_panel.body_name.pack()
-        self.info_panel.body_mass = tkinter.Label(self.info_frame, text="Hello, World!")
-        self.info_panel.body_mass.pack()
+        self.info_panel.body_name = tkinter.Label(self.info_frame, text="Hello, World!", anchor=tkinter.W)
+        self.info_panel.body_name.pack(fill=tkinter.X)
+        self.info_panel.body_mass = tkinter.Label(self.info_frame, text="Hello, World!", anchor=tkinter.W)
+        self.info_panel.body_mass.pack(fill=tkinter.X)
 
     def get_origin(self):
         return self._origin
