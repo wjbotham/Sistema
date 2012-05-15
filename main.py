@@ -11,11 +11,11 @@ def main():
     u.generate_view_thread()
 
     while not u.view:
-        None
+        pass
     next_tick = clock()+1
     while u.view:
         while clock() < next_tick:
-            None
+            pass
         u.pass_hour(1)
         next_tick += 1
 

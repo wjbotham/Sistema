@@ -25,8 +25,13 @@ class View:
         self.update()
         
         self.info_panel = tkinter.Tk()
-        w = tkinter.Label(self.info_panel, text="Hello, world!")
-        w.pack()
+        self.info_panel.protocol("WM_DELETE_WINDOW", lambda: None)
+        self.info_frame = tkinter.Frame(width=256, height=256)
+        self.info_frame.pack()
+        self.info_panel.body_name = tkinter.Label(self.info_frame, text="Hello, World!")
+        self.info_panel.body_name.pack()
+        self.info_panel.body_mass = tkinter.Label(self.info_frame, text="Hello, World!")
+        self.info_panel.body_mass.pack()
 
     def get_origin(self):
         return self._origin
@@ -45,6 +50,8 @@ class View:
         return self._trackee
     def set_trackee(self,trackee):
         self._trackee = trackee
+        self.info_panel.body_mass.config(text="Mass: %.2E kg" % self._trackee.mass)
+        self.info_panel.body_name.config(text="Name: "+self._trackee.name)
         self.update()
     trackee = property(get_trackee,set_trackee)
 
@@ -63,6 +70,7 @@ class View:
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    self.info_panel.quit()
                     self.universe.view = None
                     return
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
@@ -70,9 +78,9 @@ class View:
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
                     self.ranging_click(event)
                 elif event.type == pygame.KEYDOWN and (event.unicode == 'a' or event.unicode == 'A'):
-                    self.km_radius *= 1.5
+                    self.km_radius *= 1.6
                 elif event.type == pygame.KEYDOWN and (event.unicode == 'z' or event.unicode == 'Z'):
-                    self.km_radius /= 1.5
+                    self.km_radius /= 1.6
                 #else:
                 #    print(event)
 
