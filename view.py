@@ -25,7 +25,7 @@ class View:
         self.update()
 
         # all of this should be abstracted into a ControlPanel class or something
-        self.info_panel = CommandInterface()
+        self.info_panel = CommandInterface(universe)
 
     def get_origin(self):
         return self._origin

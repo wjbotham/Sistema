@@ -15,6 +15,11 @@ def main():
     next_tick = clock()+1
     while u.view:
         while clock() < next_tick:
+            if u.paused:
+                time_left = next_tick - clock()
+                while u.paused:
+                    pass
+                next_tick = clock() + time_left
             pass
         u.pass_hour(1)
         next_tick += 1
