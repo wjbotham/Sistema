@@ -44,7 +44,6 @@ class View:
         return self._trackee
     def set_trackee(self,trackee):
         self._trackee = trackee
-        self.info_panel.update_displayed_body(self._trackee)
         self.update()
     trackee = property(get_trackee,set_trackee)
 
