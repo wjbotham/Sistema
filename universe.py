@@ -2,6 +2,7 @@ from math import ceil,sqrt
 from view import View
 from threading import Thread
 from vector import Vector
+from time import clock
 
 class Universe:
     def __init__(self,paused=True,G = 8.6493e-13):
@@ -37,10 +38,6 @@ class Universe:
         distance = (b1.position - b2.position).magnitude()
         return ceil((velocity_diff/accel)+(distance/sqrt(accel*distance/4)))
 
-    def generate_view_thread(self):
-        t = Thread(target=self.ui_loop)
-        t.start()
-
     def ui_loop(self):
         self.view = View(self)
         self.view.ui_loop()
@@ -58,3 +55,20 @@ class Universe:
             orbit_speed = (self.bodies[0].velocity - bodyi.velocity).magnitude()
             print(bodyi.name+": dist=("+('%.2E' % dist)+"), orbit speed=("+('%.2E' % orbit_speed)+"), mass="+('%.2E' % bodyi.mass))
         print()
+
+    def run(self):
+        t = Thread(target=self.ui_loop)
+        t.start()
+        while not self.view:
+            pass
+        next_tick = clock()+1
+        while self.view:
+            while clock() < next_tick:
+                if self.paused:
+                    time_left = next_tick - clock()
+                    while self.paused:
+                        pass
+                    next_tick = clock() + time_left
+                pass
+            self.pass_hour(1)
+            next_tick += 1
