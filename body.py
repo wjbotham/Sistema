@@ -9,6 +9,7 @@ class Body:
         self.position = position
         self.velocity = velocity
         self.color = color
+        self.agents = set()
 
     def apply_velocity(self):
         self.position += self.velocity
@@ -16,7 +17,18 @@ class Body:
     def apply_gravity(self):
         gravity_sum = sum(self.attraction(other) for other in self.universe.bodies if other != self)
         self.velocity += gravity_sum / self.mass
-         
+
+    def add_agent(self,agent):
+        self.agents.add(agent)
+        self.update_agent_ui()
+            
+    def remove_agent(self,agent):
+        self.agents.remove(agent)
+        self.update_agent_ui()
+        
+    def update_agent_ui(self):
+        if self.universe.view and self == self.universe.view.range_sel:
+            self.universe.view.info_panel.update_agents()
     '''
     progression: the satellite's current progression around the ellipse
         0 is at the positive semi-major axis, pi/2 is at the positive semi-minor axis

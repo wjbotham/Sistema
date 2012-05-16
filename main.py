@@ -1,5 +1,6 @@
 from universe import Universe
 from world_gen import generate_system
+from agent import Agent
 
 ''' mass is in kilograms '''
 ''' distance is in kilometers '''
@@ -7,6 +8,8 @@ from world_gen import generate_system
 
 def main():
     u = generate_system()
+    a = Agent("UNSK5672",u.bodies[0])
+    b = Agent("SDBJ3178",u.bodies[0])
     u.run()
 
 if __name__ == "__main__":
