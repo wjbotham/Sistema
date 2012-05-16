@@ -18,7 +18,11 @@ class CommandInterface:
         self.universe = universe
         def toggle_timer():
             self.universe.paused = not self.universe.paused
-        self.frame.timer_button = Button(self.Tk, text="Toggle Timer", command = toggle_timer)
+            if self.universe.paused:
+                self.frame.timer_button.config(text="Unpause")
+            else:
+                self.frame.timer_button.config(text="Pause")
+        self.frame.timer_button = Button(self.Tk, text="Unpause", command = toggle_timer)
         self.frame.timer_button.pack()
 
     def update_displayed_body(self,body):
