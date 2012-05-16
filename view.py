@@ -125,6 +125,10 @@ class View:
         textRect = text.get_rect()
         textRect.centerx,textRect.centery = (24,7)
         self.window.blit(text, textRect)
+        text = self.font.render("T+%d" % self.universe.time, True, LIGHT_GRAY, BLACK)
+        textRect = text.get_rect()
+        textRect.centerx,textRect.centery = (24,7+11)
+        self.window.blit(text, textRect)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             pos = self.km_to_px(body.position.x,body.position.y)
             text = self.font.render(body.name, True, LIGHT_GRAY, BLACK)
