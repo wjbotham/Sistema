@@ -85,6 +85,9 @@ class View:
     def ranging_click(self,event):
         subject = self.find_subject_body(event)
         if subject:
+            if self.info_panel.teleport_order:
+                self.info_panel.teleport_order.teleport(subject)
+                self.info_panel.teleport_order = None
             if self.range_sel:
                 print("%.2E" % subject.distance(self.range_sel))
             self.range_sel = subject

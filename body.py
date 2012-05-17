@@ -9,7 +9,7 @@ class Body:
         self.position = position
         self.velocity = velocity
         self.color = color
-        self.agents = set()
+        self.agents = []
 
     def apply_velocity(self):
         self.position += self.velocity
@@ -19,7 +19,7 @@ class Body:
         self.velocity += gravity_sum / self.mass
 
     def add_agent(self,agent):
-        self.agents.add(agent)
+        self.agents.append(agent)
         self.update_agent_ui()
             
     def remove_agent(self,agent):

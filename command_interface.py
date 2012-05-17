@@ -29,6 +29,15 @@ class CommandInterface:
         self.frame.listbox.pack()
         self.update_agents()
 
+        self.teleport_order = None
+        def teleport():
+            agent_name = self.frame.listbox.get(int(self.frame.listbox.curselection()[0]))
+            agents = self.universe.view.range_sel.agents
+            agent = agents[tuple(map(lambda a: a.name, agents)).index(agent_name)]
+            self.teleport_order = agent
+        self.frame.teleport_button = Button(self.Tk, text="Teleport", command = teleport)
+        self.frame.teleport_button.pack()
+
     def update_agents(self):
         if not self.universe.view:
             return
