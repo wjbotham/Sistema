@@ -7,6 +7,13 @@ tau = 2*pi
 # TODO
 # Perhaps there should be a class that instantiates
 # the RNG itself.
+#
+# Perhaps the RNG should belong to the Universe object
+# so that procedural generation of events throughout
+# the game can be replicated.
+#
+# Perhaps all these methods could be folded into the
+# Universe object.
 rng = Random()
 def generate_system(seed=None):
     if seed:
