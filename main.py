@@ -7,7 +7,7 @@ from agent import Agent
 ''' velocity is in kilometers per minute '''
 
 def main():
-    u = generate_system()
+    u = generate_system("Here is my sample system")
     a = Agent("UNSK5672",u.bodies[0])
     b = Agent("SDBJ3178",u.bodies[0])
     u.run()
