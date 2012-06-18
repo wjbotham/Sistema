@@ -1,16 +1,22 @@
 from universe import Universe
 from body import Body
-from random import random,uniform,randint
+from random import Random
 from math import pi,log
 tau = 2*pi
 
-def generate_system():
+# TODO
+# Perhaps there should be a class that instantiates
+# the RNG itself.
+rng = Random()
+def generate_system(seed=None):
+    if seed:
+        rng.seed(seed)
     u = Universe()
-    sun = Body("The Sun",pow(10,29+random()*2))
+    sun = Body("The Sun",pow(10,29+rng.random()*2))
     u.add_body(sun)
-    for i in range(1 + randint(0,3) + randint(0,3)):
+    for i in range(1 + rng.randint(0,3) + rng.randint(0,3)):
         add_gas_giant(sun)
-    for i in range(1 + randint(0,3) + randint(0,3)):
+    for i in range(1 + rng.randint(0,3) + rng.randint(0,3)):
         add_rocky_planet(sun)
     u.bodies.sort(key=lambda obj:obj.distance(sun))
     return u
@@ -49,17 +55,17 @@ def add_moon(parent):
 
 def exprange(r):
     a,b = r
-    return pow(2,uniform(a,b))
+    return pow(2,rng.uniform(a,b))
 
 def add_object(parent,prefix,mass_range,sma_range,ecc_range,theta_range,color,reverse_odds=0.002):
     mass = exprange(mass_range)
     sma = exprange(sma_range)
     ecc = exprange(ecc_range)
-    prog = random()*tau
+    prog = rng.random()*tau
     theta = exprange(theta_range)*tau
-    phi = random()*tau
-    incl_angle = random()*tau
-    reverse_orbit = (random() < reverse_odds)
+    phi = rng.random()*tau
+    incl_angle = rng.random()*tau
+    reverse_orbit = (rng.random() < reverse_odds)
     index = list(map(lambda b: b.name[:2], parent.universe.bodies)).count(prefix)+1
     parent.add_satellite("%s%d"%(prefix,index),mass,color,sma,ecc,prog,theta,phi,incl_angle,reverse_orbit)
     
