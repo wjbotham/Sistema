@@ -61,7 +61,8 @@ class Universe:
         t.start()
         while not self.view:
             pass
-        next_tick = clock()+1
+        seconds_per_tick = 1
+        next_tick = clock() + seconds_per_tick
         while self.view:
             while clock() < next_tick:
                 if self.paused:
@@ -71,4 +72,4 @@ class Universe:
                     next_tick = clock() + time_left
                 pass
             self.pass_hour(1)
-            next_tick += 1
+            next_tick += seconds_per_tick
