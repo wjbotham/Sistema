@@ -25,7 +25,9 @@ class Universe:
                 body.apply_velocity()
             for body in self.bodies:
                 body.apply_gravity()
-        print("Development: %s" % self.generator.generate_development())
+        dev = self.generator.generate_development()
+        if dev:
+            print("Development: %d at t=%d" % (dev,self.time))
         if self.view:
             self.view.update()
 
