@@ -5,10 +5,11 @@ from vector import Vector
 from time import clock
 
 class Universe:
-    def __init__(self,generator,paused=True,G = 8.6493e-13):
+    def __init__(self,generator,paused=True,G = 8.6493e-15):
         self.bodies = []
         self.time = 0
-        # gravitational constant is in kilometers cubed per kilogram per hour squared
+        # gravitational constant is in kilometers cubed per kilogram per turn squared
+        # 1 turn = 6 minutes
         self.G = G
         self.view = None
         self.paused = paused
@@ -18,13 +19,12 @@ class Universe:
         body.universe = self
         self.bodies.append(body)
 
-    def pass_hour(self,hours=1):
-        for i in range(hours):
-            self.time += 1
-            for body in self.bodies:
-                body.apply_velocity()
-            for body in self.bodies:
-                body.apply_gravity()
+    def pass_turn(self):
+        self.time += 0.1
+        for body in self.bodies:
+            body.apply_velocity()
+        for body in self.bodies:
+            body.apply_gravity()
         dev = self.generator.generate_development()
         if dev:
             print("Development: %d at t=%d" % (dev,self.time))
@@ -65,15 +65,15 @@ class Universe:
         t.start()
         while not self.view:
             pass
-        seconds_per_tick = 1
-        next_tick = clock() + seconds_per_tick
+        seconds_per_turn = 1
+        next_turn = clock() + seconds_per_turn
         while self.view:
-            while clock() < next_tick:
+            while clock() < next_turn:
                 if self.paused:
-                    time_left = next_tick - clock()
+                    time_left = next_turn - clock()
                     while self.paused:
                         pass
-                    next_tick = clock() + time_left
+                    next_turn = clock() + time_left
                 pass
-            self.pass_hour(1)
-            next_tick += seconds_per_tick
+            self.pass_turn()
+            next_turn += seconds_per_turn

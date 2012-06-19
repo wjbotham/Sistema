@@ -26,7 +26,7 @@ class WorldGenerator:
         # a system or the seed won't make the same world
         assert(self.system_generated)
         result = None
-        if self.rng.random() <= 0.1:
+        if self.rng.random() <= 0.01:
             result = self.rng.randint(1,1000000)
         return result
         
