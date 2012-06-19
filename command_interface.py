@@ -32,7 +32,7 @@ class CommandInterface:
         self.teleport_order = None
         def teleport():
             agent_name = self.frame.listbox.get(int(self.frame.listbox.curselection()[0]))
-            agents = self.universe.view.range_sel.agents
+            agents = self.universe.view.selected.agents
             agent = agents[tuple(map(lambda a: a.name, agents)).index(agent_name)]
             self.teleport_order = agent
         self.frame.teleport_button = Button(self.Tk, text="Teleport", command = teleport)
@@ -42,7 +42,7 @@ class CommandInterface:
         if not self.universe.view:
             return
         
-        body = self.universe.view.range_sel
+        body = self.universe.view.selected
         self.frame.listbox.delete(0,END)
         if body:
             self.frame.listbox.delete(0,END)

@@ -27,8 +27,8 @@ class Body:
         self.update_agent_ui()
         
     def update_agent_ui(self):
-        if self.universe.view and self == self.universe.view.range_sel:
-            self.universe.view.info_panel.update_agents()
+        if self.universe.view and self == self.universe.view.selected:
+            self.universe.view.interface.update_agents()
     '''
     progression: the satellite's current progression around the ellipse
         0 is at the positive semi-major axis, pi/2 is at the positive semi-minor axis
