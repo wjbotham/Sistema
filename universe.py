@@ -5,13 +5,14 @@ from vector import Vector
 from time import clock
 
 class Universe:
-    def __init__(self,paused=True,G = 8.6493e-13):
+    def __init__(self,generator,paused=True,G = 8.6493e-13):
         self.bodies = []
         self.time = 0
         # gravitational constant is in kilometers cubed per kilogram per hour squared
         self.G = G
         self.view = None
         self.paused = paused
+        self.generator = generator
 
     def add_body(self,body):
         body.universe = self
@@ -24,6 +25,7 @@ class Universe:
                 body.apply_velocity()
             for body in self.bodies:
                 body.apply_gravity()
+        print("Development: %s" % self.generator.generate_development())
         if self.view:
             self.view.update()
 

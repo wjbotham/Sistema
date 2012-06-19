@@ -1,5 +1,4 @@
-from universe import Universe
-from world_gen import generate_system
+from world_gen import WorldGenerator
 from agent import Agent
 
 ''' mass is in kilograms '''
@@ -7,7 +6,8 @@ from agent import Agent
 ''' velocity is in kilometers per minute '''
 
 def main():
-    u = generate_system("Here is my sample system")
+    wg = WorldGenerator("Here is my sample system")
+    u = wg.generate_system()
     a = Agent("UNSK5672",u.bodies[0])
     b = Agent("SDBJ3178",u.bodies[0])
     u.run()
