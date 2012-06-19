@@ -1,5 +1,5 @@
 from math import ceil,sqrt
-from view import View
+from interface import Interface
 from threading import Thread
 from vector import Vector
 from time import clock
@@ -43,7 +43,7 @@ class Universe:
         return ceil((velocity_diff/accel)+(distance/sqrt(accel*distance/4)))
 
     def ui_loop(self):
-        self.view = View(self)
+        self.view = Interface(self)
         self.view.ui_loop()
 
     def describe_system(self):

@@ -1,15 +1,15 @@
 import pygame
+from tkinter import *
 from vector import Vector
 from math import sqrt
 from threading import Thread
-from command_interface import CommandInterface
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 LIGHT_GRAY = (127,127,127)
 GREEN = (0,255,0)
 
-class View:
+class Interface(Frame):
     def __init__(self,universe):
         self.universe = universe
         self._selected = max(self.universe.bodies, key=lambda b: b.mass)
@@ -24,7 +24,58 @@ class View:
         self.update()
 
         # all of this should be abstracted into a ControlPanel class or something
-        self.interface = CommandInterface(universe)
+        self.createGUI()
+
+    def destroy(self):
+        pygame.quit()
+        self.universe.view = None
+
+    def createGUI(self):
+        Frame.__init__(self)#, width=128, height=128)
+        self.pack_propagate(1)
+        self.pack()
+        
+        def addLabel():
+            a = Label(self, anchor=W)
+            a.pack(fill=X)
+            return a
+        self.body_name = addLabel()
+        self.body_mass = addLabel()
+
+        def toggle_timer():
+            self.universe.paused = not self.universe.paused
+            if self.universe.paused:
+                self.timer_button.config(text="Unpause")
+            else:
+                self.timer_button.config(text="Pause")
+        self.timer_button = Button(self, text="Unpause", command = toggle_timer)
+        self.timer_button.pack()
+
+        self.listbox = Listbox(self)
+        self.listbox.pack()
+        self.update_agents()
+
+        self.teleport_order = None
+        def teleport():
+            agent_name = self.listbox.get(int(self.listbox.curselection()[0]))
+            agents = self.selected.agents
+            agent = agents[tuple(map(lambda a: a.name, agents)).index(agent_name)]
+            self.teleport_order = agent
+        self.teleport_button = Button(self, text="Teleport", command = teleport)
+        self.teleport_button.pack()
+
+    def update_agents(self):
+        body = self.selected
+        self.listbox.delete(0,END)
+        if body:
+            self.listbox.delete(0,END)
+            for agent in body.agents:
+                self.listbox.insert(END,agent.name)
+    
+    def update_displayed_body(self,body):
+        self.body_mass.config(text="Mass: %.2E kg" % body.mass)
+        self.body_name.config(text="Name: "+body.name)
+        self.update_agents()
 
     def get_origin(self):
         return self._origin
@@ -43,20 +94,18 @@ class View:
         return self._selected
     def set_selected(self,selected):
         self._selected = selected
-        self.interface.update_displayed_body(selected)
+        self.update_displayed_body(selected)
         self.update()
     selected = property(get_selected,set_selected)
 
     def ui_loop(self):
-        interface_thread = Thread(target=self.interface.mainloop)
+        interface_thread = Thread(target=self.mainloop)
         interface_thread.start()
         #input handling (somewhat boilerplate code):
         while True: 
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    self.interface.quit()
-                    self.universe.view = None
+                    Frame.destroy(self)
                     return
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.recenter_click(event)
@@ -73,9 +122,9 @@ class View:
         subject = self.find_subject_body(event)
         if subject:
             self.selected = subject
-            if self.interface.teleport_order:
-                self.interface.teleport_order.teleport(subject)
-                self.interface.teleport_order = None
+            if self.teleport_order:
+                self.teleport_order.teleport(subject)
+                self.teleport_order = None
 
     def ranging_click(self,event):
         subject = self.find_subject_body(event)
