@@ -22,7 +22,8 @@ class Interface:
         self._origin = universe.center_of_mass()
         self._km_radius = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05
 
-        self.ui_elements = [UIElement(100,100,100,100)]
+        self.ui_elements = [UIElement(self,100,100,100,100,GREEN)]
+        self.grabbed_element = None
         self.update()
 
     def quit(self):
@@ -61,8 +62,14 @@ class Interface:
                     self.ranging_click(event)
                 elif event.type == pygame.KEYDOWN:
                     self.handle_key_down(event)
-                #else:
-                #    print(event)
+                elif event.type == pygame.MOUSEMOTION:
+                    if self.grabbed_element:
+                        mx,my = event.pos
+                        ox,oy = self.grabbed_element.picked_up
+                        self.grabbed_element.x,self.grabbed_element.y = mx+ox,my+oy
+                        self.update()
+                else:
+                    print(event)
 
     def handle_key_down(self,event):
         if event.unicode == 'a' or event.unicode == 'A':
@@ -93,11 +100,6 @@ class Interface:
         if subject:
             if self.selected:
                 print("%.2E" % subject.distance(self.selected))
-        # TESTING NONSENSE
-        e = self.ui_elements[0]
-        e.x,e.y = map(lambda a: a-50, event.pos)
-        self.update()
-        # TESTING NONSENSE
 
     def find_subject_body(self,event):
         ev_x,ev_y = event.pos
@@ -174,21 +176,32 @@ class Interface:
             pygame.draw.circle(self.window, GREEN, pos, 5, 1)
 
     def draw_element(self,element):
-        pygame.draw.rect(self.window, RED, (element.x,element.y,element.height,element.width), 0)
+        s = pygame.Surface((element.height,element.width), pygame.SRCALPHA)
+        s.fill(element.color+(128,))
+        self.window.blit(s, (element.x,element.y))
+        for button in element.buttons:
+            s = pygame.Surface((button.height,button.width))
+            s.fill(button.color+(255,))
+            self.window.blit(s, (button.x+element.x,button.y+element.y))
+        #pygame.draw.rect(self.window, RED, (element.x,element.y,element.height,element.width), 0)
         info = [self.selected.name,
                 "Mass: %.2E" % self.selected.mass,
-                "Dist: %.4E" % (self.selected.position - self.universe.sun.position).magnitude()]
-        self.draw_text(info, element.x+2, element.y+2, BLACK, RED)
+                "Dist: %.2E" % (self.selected.position - self.universe.sun.position).magnitude()]
+        self.draw_text(info, element.x+2, element.y+2, BLACK, None, 128)
 
-    def draw_text(self,text_ary,x,y,text_color,background_color=None):
+    def draw_text(self,text_ary,x,y,text_color,background_color=None,alpha=255):
         line = text_ary[0]
 
         w,h = self.font.size(line)
-        text = self.font.render(line, True, text_color, background_color)
+        if background_color:
+            text = self.font.render(line, True, text_color, background_color)
+        else:
+            text = self.font.render(line, True, text_color)
+        text.set_alpha(alpha)
         textRect = text.get_rect()
         textRect.centerx,textRect.centery = x+w/2,y+h/2
 
         if len(text_ary) > 1:
-            self.draw_text(text_ary[1:], x, y+h, text_color, background_color)
+            self.draw_text(text_ary[1:], x, y+h, text_color, background_color, alpha)
         self.window.blit(text, textRect)
         
