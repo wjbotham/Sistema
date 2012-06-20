@@ -14,6 +14,7 @@ class Universe:
         self.view = None
         self.paused = paused
         self.generator = generator
+        self.sun = None
 
     def add_body(self,body):
         body.universe = self

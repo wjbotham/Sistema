@@ -34,6 +34,7 @@ class WorldGenerator:
         u = Universe(self)
         sun = Body("The Sun",pow(10,29+self.rng.random()*2))
         u.add_body(sun)
+        u.sun = sun
         for i in range(1 + self.rng.randint(0,4) + self.rng.randint(0,4)):
             self.add_gas_giant(sun)
         for i in range(1 + self.rng.randint(0,4) + self.rng.randint(0,4)):
