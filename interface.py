@@ -10,15 +10,14 @@ GREEN      = (0,255,0)
 RED        = (255,0,0)
 
 class Interface:
-    def __init__(self,universe):
+    def __init__(self,universe,height=800,width=1000):
         self.universe = universe
         self._selected = max(self.universe.bodies, key=lambda b: b.mass)
-        self.pixel_width = 800
         
         pygame.init()
         self.font = pygame.font.SysFont(None, 14)
         #create the screen
-        self.window = pygame.display.set_mode((self.pixel_width, self.pixel_width))
+        self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self._origin = universe.center_of_mass()
         self._km_radius = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05
 
@@ -42,6 +41,18 @@ class Interface:
         self._km_radius = km_radius
         self.update()
     km_radius = property(get_km_radius,set_km_radius)
+
+    def get_aspect_ratio(self):
+        return self.pixel_height / self.pixel_width
+    aspect_ratio = property(get_aspect_ratio)
+
+    def get_pixel_width(self):
+        return self.window.get_size()[0]
+    pixel_width = property(get_pixel_width)
+
+    def get_pixel_height(self):
+        return self.window.get_size()[1]
+    pixel_height = property(get_pixel_height)
 
     def get_selected(self):
         return self._selected
@@ -68,6 +79,11 @@ class Interface:
                         ox,oy = self.grabbed_element.picked_up
                         self.grabbed_element.x,self.grabbed_element.y = mx+ox,my+oy
                         self.update()
+                elif event.type == pygame.VIDEORESIZE:
+                    self.window = pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                    # TODO Move floaty windows so they don't get lost outside of the display area
+                    # TODO Figure out how to avoid the ugly streaking when resized larger
+                    self.update()
                 else:
                     print(event)
 
@@ -115,13 +131,15 @@ class Interface:
             return None
 
     def km_to_px(self,x,y):
-        nx = (x + self.km_radius - self.origin.x)*(self.pixel_width / (2*self.km_radius))
-        ny = (y - self.km_radius - self.origin.y)*(self.pixel_width / (2*self.km_radius))*(-1)
+        x_km_radius = self.km_radius/self.aspect_ratio
+        nx = (x + x_km_radius    - self.origin.x) * (self.pixel_height / (2 * self.km_radius))
+        ny = (y - self.km_radius - self.origin.y) * (self.pixel_height / (2 * self.km_radius)) * (-1)
         return (round(nx),round(ny))
     
     def px_to_km(self,x,y):
-        nx = (x * 2 * self.km_radius / self.pixel_width     ) - self.km_radius + self.origin.x
-        ny = (y * 2 * self.km_radius / self.pixel_width * -1) + self.km_radius + self.origin.y
+        x_km_radius = self.km_radius/self.aspect_ratio
+        nx = (x * 2 * x_km_radius    / self.pixel_height     ) - self.km_radius + self.origin.x
+        ny = (y * 2 * self.km_radius / self.pixel_height * -1) + self.km_radius + self.origin.y
         return (nx,ny)
 
     def update(self):
@@ -145,7 +163,7 @@ class Interface:
         '''
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
-        for element in self.ui_elements:
+        for element in reversed(self.ui_elements):
             self.draw_element(element)
         #draw it to the screen
         # TODO: implement some way of tracking changes, then translate
