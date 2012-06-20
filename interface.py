@@ -1,12 +1,13 @@
 import pygame
 from vector import Vector
 from math import sqrt
-from threading import Thread
+from ui_element import UIElement
 
-BLACK = (0,0,0)
-WHITE = (255,255,255)
+BLACK      = (0,0,0)
+WHITE      = (255,255,255)
 LIGHT_GRAY = (127,127,127)
-GREEN = (0,255,0)
+GREEN      = (0,255,0)
+RED        = (255,0,0)
 
 class Interface:
     def __init__(self,universe):
@@ -20,6 +21,8 @@ class Interface:
         self.window = pygame.display.set_mode((self.pixel_width, self.pixel_width))
         self._origin = universe.center_of_mass()
         self._km_radius = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05
+
+        self.ui_elements = [UIElement(100,100,100,100)]
         self.update()
 
     def quit(self):
@@ -53,18 +56,33 @@ class Interface:
                     self.quit()
                     return
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.recenter_click(event)
+                    self.handle_left_click(event)
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
                     self.ranging_click(event)
-                elif event.type == pygame.KEYDOWN and (event.unicode == 'a' or event.unicode == 'A'):
-                    self.km_radius *= 1.9
-                elif event.type == pygame.KEYDOWN and (event.unicode == 'z' or event.unicode == 'Z'):
-                    self.km_radius /= 1.9
-                elif event.type == pygame.KEYDOWN and (event.unicode == 'p' or event.unicode == 'P'):
-                    self.universe.paused = not self.universe.paused
+                elif event.type == pygame.KEYDOWN:
+                    self.handle_key_down(event)
                 #else:
                 #    print(event)
 
+    def handle_key_down(self,event):
+        if event.unicode == 'a' or event.unicode == 'A':
+            self.km_radius *= 1.9
+        elif event.unicode == 'z' or event.unicode == 'Z':
+            # this filter is here so we don't magnify to the point where it breaks,
+            # so fix that bug and then remove this TODO
+            if self.km_radius > 10000:
+                self.km_radius /= 1.9
+        elif event.unicode == 'p' or event.unicode == 'P':
+            self.universe.paused = not self.universe.paused
+
+    def handle_left_click(self,event):
+        x,y = event.pos
+        for element in self.ui_elements:
+            if element.contains(x,y):
+                element.handle_left_click(event)
+                return
+        self.recenter_click(event)
+        
     def recenter_click(self,event):
         subject = self.find_subject_body(event)
         if subject:
@@ -75,6 +93,11 @@ class Interface:
         if subject:
             if self.selected:
                 print("%.2E" % subject.distance(self.selected))
+        # TESTING NONSENSE
+        e = self.ui_elements[0]
+        e.x,e.y = map(lambda a: a-50, event.pos)
+        self.update()
+        # TESTING NONSENSE
 
     def find_subject_body(self,event):
         ev_x,ev_y = event.pos
@@ -107,6 +130,8 @@ class Interface:
         else:
             self.origin = self.universe.center_of_mass()
         self.window.fill(BLACK)
+        self.draw_text(["%.2E" % self.km_radius, "T+%d" % self.universe.time], 1, 1, LIGHT_GRAY, BLACK)
+        '''
         text = self.font.render("%.2E" % self.km_radius, True, LIGHT_GRAY, BLACK)
         textRect = text.get_rect()
         textRect.centerx,textRect.centery = (24,7)
@@ -115,31 +140,55 @@ class Interface:
         textRect = text.get_rect()
         textRect.centerx,textRect.centery = (24,7+11)
         self.window.blit(text, textRect)
+        '''
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
-            pos = self.km_to_px(body.position.x,body.position.y)
-            text = self.font.render(body.name, True, LIGHT_GRAY, BLACK)
-            textRect = text.get_rect()
-            textRect.centerx,textRect.centery = pos
-            textRect.centery += 8
-            self.window.blit(text, textRect)
-            if body != self.selected:
-                x_offset = body.position.x-self.selected.position.x
-                y_offset = body.position.y-self.selected.position.y
-                z_offset = body.position.z-self.selected.position.z
-                xy_dist = sqrt(x_offset**2 + y_offset**2)
-                if abs(z_offset) >= xy_dist/10:
-                    text = self.font.render("%.2E" % z_offset, True, LIGHT_GRAY, BLACK)
-                    textRect = text.get_rect()
-                    textRect.centerx,textRect.centery = pos
-                    textRect.centery += 19
-                    self.window.blit(text, textRect)
-            rel_height = ((body.position.z-self.selected.position.z)/self.km_radius)+0.5
-            rel_height = max(0,min(1,rel_height))
-            height_color = tuple(map(lambda n:n*rel_height,body.color))
-            pygame.draw.circle(self.window, height_color, pos, 2, 0)
-            if body == self.selected:
-                pygame.draw.circle(self.window, GREEN, pos, 5, 1)
+            self.draw_body(body)
+        for element in self.ui_elements:
+            self.draw_element(element)
         #draw it to the screen
         # TODO: implement some way of tracking changes, then translate
         #       this to use pygame.display.update(rectangles)
         pygame.display.flip()
+
+    def draw_body(self,body):
+        pos = self.km_to_px(body.position.x,body.position.y)
+        text = self.font.render(body.name, True, LIGHT_GRAY, BLACK)
+        textRect = text.get_rect()
+        textRect.centerx,textRect.centery = pos
+        textRect.centery += 8
+        self.window.blit(text, textRect)
+        if body != self.selected:
+            x_offset,y_offset,z_offset = (body.position - self.selected.position).coord()
+            xy_dist = sqrt(x_offset**2 + y_offset**2)
+            #if abs(z_offset) >= xy_dist/10:
+            #    text = self.font.render("%.2E" % z_offset, True, LIGHT_GRAY, BLACK)
+            #    textRect = text.get_rect()
+            #    textRect.centerx,textRect.centery = pos
+            #    textRect.centery += 19
+            #    self.window.blit(text, textRect)
+        rel_height = ((body.position.z-self.selected.position.z)/self.km_radius)+0.5
+        rel_height = max(0,min(1,rel_height))
+        height_color = tuple(map(lambda n:n*rel_height,body.color))
+        pygame.draw.circle(self.window, height_color, pos, 2, 0)
+        if body == self.selected:
+            pygame.draw.circle(self.window, GREEN, pos, 5, 1)
+
+    def draw_element(self,element):
+        pygame.draw.rect(self.window, RED, (element.x,element.y,element.height,element.width), 0)
+        info = [self.selected.name,
+                "Mass: %.2E" % self.selected.mass,
+                "Dist: %.4E" % (self.selected.position - self.universe.sun.position).magnitude()]
+        self.draw_text(info, element.x+2, element.y+2, BLACK, RED)
+
+    def draw_text(self,text_ary,x,y,text_color,background_color=None):
+        line = text_ary[0]
+
+        w,h = self.font.size(line)
+        text = self.font.render(line, True, text_color, background_color)
+        textRect = text.get_rect()
+        textRect.centerx,textRect.centery = x+w/2,y+h/2
+
+        if len(text_ary) > 1:
+            self.draw_text(text_ary[1:], x, y+h, text_color, background_color)
+        self.window.blit(text, textRect)
+        

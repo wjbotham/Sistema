@@ -38,6 +38,9 @@ class Vector:
     def normalized(self):
         return self / self.magnitude()
 
+    def coord(self):
+        return self.x,self.y,self.z
+
     # http://upload.wikimedia.org/wikipedia/commons/4/4f/3D_Spherical.svg
     def rotated(self,theta,phi):
         x,y,z = self.x,self.y,self.z
