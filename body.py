@@ -2,10 +2,11 @@ from vector import Vector
 from math import sqrt,cos,sin,acos,pi,atan2
 
 class Body:
-    def __init__(self,name,mass,color=(255,255,255),position=Vector(),velocity=Vector(),universe=None):
+    def __init__(self,name,mass,density,color=(255,255,255),position=Vector(),velocity=Vector(),universe=None):
         self.name = name
         self.universe = universe
         self.mass = mass
+        self.radius = (3*mass/4/pi/density)**(1/3)
         self.position = position
         self.velocity = velocity
         self.color = color
@@ -26,7 +27,7 @@ class Body:
         basically http://en.wikipedia.org/wiki/Longitude_of_the_ascending_node
     reverse_orbit: 
     '''
-    def add_satellite(self,name,mass,color,semimajor_axis,eccentricity,progression,theta,phi,incl_angle,reverse_orbit=False):
+    def add_satellite(self,name,mass,density,color,semimajor_axis,eccentricity,progression,theta,phi,incl_angle,reverse_orbit=False):
         semiminor_axis = semimajor_axis * sqrt(1-eccentricity**2)
         
         # calculate position in ellipse
@@ -49,7 +50,7 @@ class Body:
         
         rel_vel = rel_vel_direction * rel_vel_magnitude
         velocity = self.velocity + rel_vel
-        self.universe.add_body(Body(name,mass,color,position,velocity))
+        self.universe.add_body(Body(name,mass,density,color,position,velocity))
 
     def attraction(self,other):
         rel_pos = other.position - self.position

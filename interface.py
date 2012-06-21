@@ -89,12 +89,12 @@ class Interface:
 
     def handle_key_down(self,event):
         if event.unicode == 'a' or event.unicode == 'A':
-            self.km_per_pixel *= 2
+            self.km_per_pixel *= 1.9
         elif event.unicode == 'z' or event.unicode == 'Z':
             # this filter is here so we don't magnify to the point where it breaks,
             # so fix that bug and then remove this TODO
-            if self.km_per_pixel / 2 > 2:
-                self.km_per_pixel /= 2
+            if self.km_per_pixel / 1.9 > 2:
+                self.km_per_pixel /= 1.9
         elif event.unicode == 'p' or event.unicode == 'P':
             self.universe.paused = not self.universe.paused
 
@@ -116,6 +116,9 @@ class Interface:
         if subject:
             if self.selected:
                 print("%.2E" % subject.distance(self.selected))
+                
+    def pixel_radius(self,body):
+        return max(2,round(body.radius / self.km_per_pixel))
 
     def find_subject_body(self,event):
         ev_x,ev_y = event.pos
@@ -123,7 +126,7 @@ class Interface:
         for body in self.universe.bodies:
             b_x,b_y = self.km_to_px(body.position.x,body.position.y)
             dist = sqrt((ev_x-b_x)**2 + (ev_y-b_y)**2)
-            if dist <= 12:
+            if dist <= 10 + self.pixel_radius(body):
                 candidates.append(body)                    
         if len(candidates) > 0:
             return max(candidates,key=lambda body: body.mass)
@@ -162,17 +165,17 @@ class Interface:
 
     def draw_body(self,body):
         pos = self.km_to_px(body.position.x,body.position.y)
+        pixel_radius = self.pixel_radius(body)
+        visible_x = (-pixel_radius <= pos[0] <= self.pixel_width  + pixel_radius)
+        visible_y = (-pixel_radius <= pos[1] <= self.pixel_height + pixel_radius)
+        if not (visible_x and visible_y):
+            return
+        pygame.draw.circle(self.window, body.color, pos, pixel_radius, 0)
         text = self.font.render(body.name, True, LIGHT_GRAY, BLACK)
         textRect = text.get_rect()
         textRect.centerx,textRect.centery = pos
-        textRect.centery += 8
+        textRect.centery += 6 + pixel_radius
         self.window.blit(text, textRect)
-        if body != self.selected:
-            x_offset,y_offset,z_offset = (body.position - self.selected.position).coord()
-            xy_dist = sqrt(x_offset**2 + y_offset**2)
-        pygame.draw.circle(self.window, body.color, pos, 2, 0)
-        if body == self.selected:
-            pygame.draw.circle(self.window, GREEN, pos, 5, 1)
 
     def draw_element(self,element):
         s = pygame.Surface((element.height,element.width), pygame.SRCALPHA)
