@@ -19,7 +19,7 @@ class Interface:
         #create the screen
         self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self._origin = universe.center_of_mass()
-        self._km_radius = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05
+        self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05/min(height,width)
 
         self.ui_elements = [UIElement(self,100,100,100,100,GREEN)]
         self.grabbed_element = None
@@ -35,12 +35,12 @@ class Interface:
         self._origin = origin
     origin = property(get_origin,set_origin)
 
-    def get_km_radius(self):
-        return self._km_radius
-    def set_km_radius(self,km_radius):
-        self._km_radius = km_radius
+    def get_km_per_pixel(self):
+        return self._km_per_pixel
+    def set_km_per_pixel(self,km_per_pixel):
+        self._km_per_pixel = km_per_pixel
         self.update()
-    km_radius = property(get_km_radius,set_km_radius)
+    km_per_pixel = property(get_km_per_pixel,set_km_per_pixel)
 
     def get_aspect_ratio(self):
         return self.pixel_height / self.pixel_width
@@ -89,12 +89,12 @@ class Interface:
 
     def handle_key_down(self,event):
         if event.unicode == 'a' or event.unicode == 'A':
-            self.km_radius *= 1.9
+            self.km_per_pixel *= 2
         elif event.unicode == 'z' or event.unicode == 'Z':
             # this filter is here so we don't magnify to the point where it breaks,
             # so fix that bug and then remove this TODO
-            if self.km_radius > 10000:
-                self.km_radius /= 1.9
+            if self.km_per_pixel / 2 > 2:
+                self.km_per_pixel /= 2
         elif event.unicode == 'p' or event.unicode == 'P':
             self.universe.paused = not self.universe.paused
 
@@ -131,15 +131,15 @@ class Interface:
             return None
 
     def km_to_px(self,x,y):
-        x_km_radius = self.km_radius/self.aspect_ratio
-        nx = (x + x_km_radius    - self.origin.x) * (self.pixel_height / (2 * self.km_radius))
-        ny = (y - self.km_radius - self.origin.y) * (self.pixel_height / (2 * self.km_radius)) * (-1)
-        return (round(nx),round(ny))
+        ox,oy = self.origin.x,self.origin.y
+        nx = round(((x-ox) / self.km_per_pixel) + (self.pixel_width  / 2))
+        ny = round(((y-oy) / self.km_per_pixel) + (self.pixel_height / 2))
+        return (nx,ny)
     
     def px_to_km(self,x,y):
-        x_km_radius = self.km_radius/self.aspect_ratio
-        nx = (x * 2 * x_km_radius    / self.pixel_height     ) - self.km_radius + self.origin.x
-        ny = (y * 2 * self.km_radius / self.pixel_height * -1) + self.km_radius + self.origin.y
+        ox,oy = self.origin.x,self.origin.y
+        nx = ((x - (self.pixel_width  / 2)) * self.km_per_pixel) + ox
+        ny = ((y - (self.pixel_height / 2)) * self.km_per_pixel) + oy
         return (nx,ny)
 
     def update(self):
@@ -150,7 +150,7 @@ class Interface:
         else:
             self.origin = self.universe.center_of_mass()
         self.window.fill(BLACK)
-        self.draw_text(["%.2E" % self.km_radius, "T+%d" % self.universe.time], 1, 1, LIGHT_GRAY, BLACK)
+        self.draw_text(["%.2E" % self.km_per_pixel, "T+%d" % self.universe.time], 1, 1, LIGHT_GRAY, BLACK)
         '''
         text = self.font.render("%.2E" % self.km_radius, True, LIGHT_GRAY, BLACK)
         textRect = text.get_rect()
@@ -186,10 +186,7 @@ class Interface:
             #    textRect.centerx,textRect.centery = pos
             #    textRect.centery += 19
             #    self.window.blit(text, textRect)
-        rel_height = ((body.position.z-self.selected.position.z)/self.km_radius)+0.5
-        rel_height = max(0,min(1,rel_height))
-        height_color = tuple(map(lambda n:n*rel_height,body.color))
-        pygame.draw.circle(self.window, height_color, pos, 2, 0)
+        pygame.draw.circle(self.window, body.color, pos, 2, 0)
         if body == self.selected:
             pygame.draw.circle(self.window, GREEN, pos, 5, 1)
 
@@ -203,8 +200,8 @@ class Interface:
             self.window.blit(s, (button.x+element.x,button.y+element.y))
         #pygame.draw.rect(self.window, RED, (element.x,element.y,element.height,element.width), 0)
         info = [self.selected.name,
-                "Mass: %.2E" % self.selected.mass,
-                "Dist: %.2E" % (self.selected.position - self.universe.sun.position).magnitude()]
+                "%.2E kg" % self.selected.mass,
+                "%.2E km" % (self.selected.position - self.universe.sun.position).magnitude()]
         self.draw_text(info, element.x+2, element.y+2, BLACK, None, 128)
 
     def draw_text(self,text_ary,x,y,text_color,background_color=None,alpha=255):
