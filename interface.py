@@ -151,21 +151,11 @@ class Interface:
             self.origin = self.universe.center_of_mass()
         self.window.fill(BLACK)
         self.draw_text(["%.2E" % self.km_per_pixel, "T+%d" % self.universe.time], 1, 1, LIGHT_GRAY, BLACK)
-        '''
-        text = self.font.render("%.2E" % self.km_radius, True, LIGHT_GRAY, BLACK)
-        textRect = text.get_rect()
-        textRect.centerx,textRect.centery = (24,7)
-        self.window.blit(text, textRect)
-        text = self.font.render("T+%d" % self.universe.time, True, LIGHT_GRAY, BLACK)
-        textRect = text.get_rect()
-        textRect.centerx,textRect.centery = (24,7+11)
-        self.window.blit(text, textRect)
-        '''
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
         for element in reversed(self.ui_elements):
             self.draw_element(element)
-        #draw it to the screen
+        # draw it to the screen
         # TODO: implement some way of tracking changes, then translate
         #       this to use pygame.display.update(rectangles)
         pygame.display.flip()
@@ -180,12 +170,6 @@ class Interface:
         if body != self.selected:
             x_offset,y_offset,z_offset = (body.position - self.selected.position).coord()
             xy_dist = sqrt(x_offset**2 + y_offset**2)
-            #if abs(z_offset) >= xy_dist/10:
-            #    text = self.font.render("%.2E" % z_offset, True, LIGHT_GRAY, BLACK)
-            #    textRect = text.get_rect()
-            #    textRect.centerx,textRect.centery = pos
-            #    textRect.centery += 19
-            #    self.window.blit(text, textRect)
         pygame.draw.circle(self.window, body.color, pos, 2, 0)
         if body == self.selected:
             pygame.draw.circle(self.window, GREEN, pos, 5, 1)
@@ -198,7 +182,6 @@ class Interface:
             s = pygame.Surface((button.height,button.width))
             s.fill(button.color+(255,))
             self.window.blit(s, (button.x+element.x,button.y+element.y))
-        #pygame.draw.rect(self.window, RED, (element.x,element.y,element.height,element.width), 0)
         info = [self.selected.name,
                 "%.2E kg" % self.selected.mass,
                 "%.2E km" % (self.selected.position - self.universe.sun.position).magnitude()]
