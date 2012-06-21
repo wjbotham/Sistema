@@ -7,36 +7,44 @@ class UIElement:
         self.height = height
         self.color = color
         self.buttons = []
-        self.add_drag_button()
+        self.add_drag_bar()
 
-    def add_drag_button(self):
+    def add_drag_bar(self):
         def pick_up(event):
-            if self.interface.grabbed_element == self:
-                self.interface.grabbed_element = None
-            else:
-                mx,my = event.pos
-                self.picked_up = self.x-mx,self.y-my
-                self.interface.grabbed_element = self
-        self.buttons.append(Button(self.width-17,5,12,12,pick_up,self.color))
+            mx,my = event.pos
+            self.picked_up = self.x-mx,self.y-my
+            self.interface.grabbed_element = self
+        self.buttons.append(Button(0,0,self.width,11,lambda event:None,pick_up,self.color))
 
     def contains(self,x,y):
         return self.x < x < (self.x + self.width) and self.y < y < (self.y + self.height)
 
-    def handle_left_click(self,event):
+    def handle_left_mouse_up(self,event):
         x,y = event.pos
         rel_x,rel_y = x-self.x,y-self.y
         for button in self.buttons:
             if button.x < rel_x < (button.x + button.width) and button.y < rel_y < (button.y + button.height):
-                button.click(event)
+                button.left_mouse_up(event)
+
+    def handle_left_mouse_down(self,event):
+        x,y = event.pos
+        rel_x,rel_y = x-self.x,y-self.y
+        for button in self.buttons:
+            if button.x < rel_x < (button.x + button.width) and button.y < rel_y < (button.y + button.height):
+                button.left_mouse_down(event)
 
 class Button:
-    def __init__(self,x,y,width,height,action,color):
+    def __init__(self,x,y,width,height,left_mouse_up_action,left_mouse_down_action,color):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.action = action
+        self.left_mouse_down_action = left_mouse_down_action
+        self.left_mouse_up_action = left_mouse_up_action
         self.color = color
 
-    def click(self,event):
-        self.action(event)
+    def left_mouse_up(self,event):
+        self.left_mouse_up_action(event)
+
+    def left_mouse_down(self,event):
+        self.left_mouse_down_action(event)

@@ -21,7 +21,7 @@ class Interface:
         self._origin = universe.center_of_mass()
         self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05/min(height,width)
 
-        self.ui_elements = [UIElement(self,100,100,100,100,GREEN)]
+        self.ui_elements = [UIElement(self,100,150,100,150,GREEN)]
         self.grabbed_element = None
         self.update()
 
@@ -68,7 +68,9 @@ class Interface:
                     self.quit()
                     return
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.handle_left_click(event)
+                    self.handle_left_mouse_up(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.handle_left_mouse_down(event)
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
                     self.ranging_click(event)
                 elif event.type == pygame.KEYDOWN:
@@ -98,13 +100,21 @@ class Interface:
         elif event.unicode == 'p' or event.unicode == 'P':
             self.universe.paused = not self.universe.paused
 
-    def handle_left_click(self,event):
+    def handle_left_mouse_up(self,event):
+        self.grabbed_element = None
         x,y = event.pos
         for element in self.ui_elements:
             if element.contains(x,y):
-                element.handle_left_click(event)
+                element.handle_left_mouse_up(event)
                 return
         self.recenter_click(event)
+
+    def handle_left_mouse_down(self,event):
+        x,y = event.pos
+        for element in self.ui_elements:
+            if element.contains(x,y):
+                element.handle_left_mouse_down(event)
+                return
         
     def recenter_click(self,event):
         subject = self.find_subject_body(event)
@@ -178,11 +188,11 @@ class Interface:
         self.window.blit(text, textRect)
 
     def draw_element(self,element):
-        s = pygame.Surface((element.height,element.width), pygame.SRCALPHA)
+        s = pygame.Surface((element.width,element.height), pygame.SRCALPHA)
         s.fill(element.color+(128,))
         self.window.blit(s, (element.x,element.y))
         for button in element.buttons:
-            s = pygame.Surface((button.height,button.width))
+            s = pygame.Surface((button.width,button.height))
             s.fill(button.color+(255,))
             self.window.blit(s, (button.x+element.x,button.y+element.y))
         info = [self.selected.name,
