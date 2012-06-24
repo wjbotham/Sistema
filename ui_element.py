@@ -132,11 +132,17 @@ class Label(UIElement):
         self.mousethru = True
 
     def get_width(self):
-        return FONT.size(self.text)[0]
+        if isinstance(self.text,str):
+            return FONT.size(self.text)[0]
+        elif isinstance(self.text,list):
+            return max(FONT.size(l)[0] for l in self.text)
     width = property(get_width,lambda self,width: None)
 
     def get_height(self):
-        return FONT.size(self.text)[1]
+        if isinstance(self.text,str):
+            return FONT.size(self.text)[1]
+        elif isinstance(self.text,list):
+            return sum(FONT.size(l)[1] for l in self.text)
     height = property(get_height,lambda self,height: None)
     
     def get_text(self,*args):
