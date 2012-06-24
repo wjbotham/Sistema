@@ -18,10 +18,10 @@ class Interface:
         self.font = pygame.font.SysFont(None, 14)
         #create the screen
         self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-        self._origin = universe.center_of_mass()
+        self._origin = self.universe.center_of_mass()
         self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05/min(height,width)
 
-        self.ui_elements = [UIElement(self,100,150,100,150,GREEN)]
+        self.ui_elements = [UIElement(self,100,150,100,150,GREEN,"Object Info")]
         self.grabbed_element = None
         self.update()
 
@@ -188,19 +188,22 @@ class Interface:
         self.window.blit(text, textRect)
 
     def draw_element(self,element):
+        alpha = 128 # opacity
         s = pygame.Surface((element.width,element.height), pygame.SRCALPHA)
-        s.fill(element.color+(128,))
+        s.fill(element.color+(alpha,))
         self.window.blit(s, (element.x,element.y))
         for button in element.buttons:
             s = pygame.Surface((button.width,button.height))
             s.fill(button.color+(255,))
             self.window.blit(s, (button.x+element.x,button.y+element.y))
+        self.draw_text([element.header], element.x+2, element.y+2, BLACK, None, alpha)
         info = [self.selected.name,
                 "%.2E kg" % self.selected.mass,
                 "%.2E km" % (self.selected.position - self.universe.sun.position).magnitude()]
-        self.draw_text(info, element.x+2, element.y+2, BLACK, None, 128)
+        self.draw_text(info, element.x+2, element.y+13, BLACK, None, alpha)
 
     def draw_text(self,text_ary,x,y,text_color,background_color=None,alpha=255):
+        assert(text_ary.__class__ == list)
         line = text_ary[0]
 
         w,h = self.font.size(line)
