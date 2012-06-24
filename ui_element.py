@@ -1,80 +1,148 @@
+import pygame
+from style import *
+
 class UIElement:
-    def __init__(self,interface,x,y,width,height,color,header,parent=None):
-        self.interface = interface
-        self._x = x
-        self._y = y
+    def __init__(self,parent,x,y,width,height,background_color):
+        self.parent = parent
+        self.rel_x = x
+        self.rel_y = y
         self.width = width
         self.height = height
-        self.color = color
-        self._header = header
-        self.buttons = []
-        self.add_drag_bar()
-        self.parent = parent
+        self.background_color = background_color
+        self.children = []
+        self.mousethru = False
+
+    def attempt_handle(self,event):
+        if self.mousethru:
+            return False
+        if self.contains(*event.pos):
+            if self.interface() == self.parent:
+                self.interface().top_element = self
+            for c in self.children:
+                if c.attempt_handle(event):
+                    return True
+            self.handle(event)
+            return True
+        else:
+            return False
+
+    def handle(self,event):
+        None
+
+    def interface(self):
+        if not isinstance(self.parent,UIElement):
+            return self.parent
+        else:
+            return self.parent.interface()
+        
+    def contains(self,x,y):
+        return self.abs_x < x < (self.abs_x + self.width) and self.abs_y < y < (self.abs_y + self.height)
+    def parent_is_ui_element(self):
+        return isinstance(self.parent,UIElement)
+
+    def get_abs_x(self):
+        if self.parent_is_ui_element():
+            return self.rel_x + self.parent.abs_x
+        return self.rel_x
+    def set_abs_x(self,x):
+        if self.parent_is_ui_element():
+            self.rel_x = x - self.parent.abs_x
+        else:
+            self.rel_x = x
+    abs_x = property(get_abs_x,set_abs_x)
+    
+    def get_abs_y(self):
+        if self.parent_is_ui_element():
+            return self.rel_y + self.parent.abs_y
+        return self.rel_y
+    def set_abs_y(self,y):
+        if self.parent_is_ui_element():
+            self.rel_y = y - self.parent.abs_y
+        else:
+            self.rel_y = y
+    abs_y = property(get_abs_y,set_abs_y)
 
     def get_x(self):
-        if self.parent:
-            return self._x + self.parent.x
-        return self._x
-    def set_x(self,x):
-        if self.parent:
-            self._x = x + self.parent.x
-        else:
-            self._x = x
-    x = property(get_x,set_x)
-    
+        assert("Stop using UIElement.x, it's too ambiguous"==None)
+    x = property(get_x)
+
     def get_y(self):
-        if self.parent:
-            return self._y + self.parent.y
-        return self._y
-    def set_y(self,y):
-        if self.parent:
-            self._y = y + self.parent.y
-        else:
-            self._y = y
-    y = property(get_y,set_y)
+        assert("Stop using UIElement.y, it's too ambiguous"==None)
+    y = property(get_y)
 
-    def add_drag_bar(self):
-        def pick_up(event):
-            mx,my = event.pos
-            self.picked_up = self.x-mx,self.y-my
-            self.interface.grabbed_element = self
-        self.buttons.append(Button(0,0,self.width,11,lambda event:None,pick_up,self.color))
+    def surface(self):
+        s = pygame.Surface((self.width,self.height), pygame.SRCALPHA)
+        s.fill(self.background_color+(OPACITY,))
+        return s
 
-    def contains(self,x,y):
-        return self.x < x < (self.x + self.width) and self.y < y < (self.y + self.height)
+class ObjectInfoBox(UIElement):
+    def __init__(self,parent,header="Object Info",border_width=1):
+        UIElement.__init__(self,parent,100,150,100,150,DARK_GREEN)
+        self.border_width = border_width
+        self.children.append(Header(self,header))
+        self.children.append(Button(self,25,25,60,15,DARK_GREEN,BLACK,"Test Button",lambda: print("Click!")))
 
-    def handle_left_mouse_up(self,event):
-        x,y = event.pos
-        rel_x,rel_y = x-self.x,y-self.y
-        for button in self.buttons:
-            if button.x < rel_x < (button.x + button.width) and button.y < rel_y < (button.y + button.height):
-                button.left_mouse_up(event)
+    def surface(self):
+        s = pygame.Surface((self.width,self.height), pygame.SRCALPHA)
+        s.fill(GREEN+(OPACITY,),(0,0,self.width,self.height))
+        s.fill(self.background_color+(OPACITY,),(self.border_width,self.border_width,self.width-2*self.border_width,self.height-2*self.border_width))
+        return s
 
-    def handle_left_mouse_down(self,event):
-        x,y = event.pos
-        rel_x,rel_y = x-self.x,y-self.y
-        for button in self.buttons:
-            if button.x < rel_x < (button.x + button.width) and button.y < rel_y < (button.y + button.height):
-                button.left_mouse_down(event)
+class Header(UIElement):
+    def __init__(self,parent,contents):
+        UIElement.__init__(self,parent,0,0,parent.width,0,parent.background_color)
+        label = Label(self,1,1,None,BLACK,contents)
+        self.height = label.height+1
+        self.children.append(label)
 
-    def get_header(self,*args):
-        if hasattr(self._header,'__call__'):
-            return self._header(*args)
-        return self._header
-    header = property(get_header)
+    def handle(self,event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.interface().grabbed_element = self.parent
+    
+    def surface(self):
+        s = pygame.Surface((self.width,self.height), pygame.SRCALPHA)
+        s.fill(self.background_color+(OPACITY,),(self.parent.border_width,self.parent.border_width,self.width-2*self.parent.border_width,self.height))
+        return s
 
-class Button:
-    def __init__(self,x,y,width,height,left_mouse_up_action,left_mouse_down_action,color):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.left_mouse_down_action = left_mouse_down_action
-        self.left_mouse_up_action = left_mouse_up_action
-        self.color = color
+class Button(UIElement):
+    def __init__(self,parent,x,y,width,height,background_color,text_color,text,action):
+        UIElement.__init__(self,parent,x,y,width,height,background_color)
+        label = Label(self,0,0,None,text_color,text)
+        label.rel_x = (self.width-label.width)/2
+        label.rel_y = (self.height-label.height)/2
+        self.children.append(label)
+        self.action = action
 
-    def left_mouse_up(self,event):
-        self.left_mouse_up_action(event)
+    def handle(self,event):
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self.action()
 
-    def left_mouse_down(self,event):
-        self.left_mouse_down_action(event)
+class Label(UIElement):
+    def __init__(self,parent,x,y,background_color,text_color,text):
+        self._text = text
+        UIElement.__init__(self,parent,x,y,None,None,background_color)
+        self.text_color = text_color
+        self.mousethru = True
+
+    def get_width(self):
+        return FONT.size(self.text)[0]
+    width = property(get_width,lambda self,width: None)
+
+    def get_height(self):
+        return FONT.size(self.text)[1]
+    height = property(get_height,lambda self,height: None)
+    
+    def get_text(self,*args):
+        if hasattr(self._text,'__call__'):
+            return self._text(*args)
+        return self._text
+    text = property(get_text)
+
+    def surface(self):
+        if isinstance(self.text,str):
+            if self.background_color:
+                text = FONT.render(self.text, True, self.text_color, self.background_color)
+            else:
+                text = FONT.render(self.text, True, self.text_color)
+            text.set_alpha(OPACITY)
+        return text
