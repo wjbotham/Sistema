@@ -1,7 +1,7 @@
 import pygame
 
 pygame.font.init()
-FONT = pygame.font.SysFont(None, 14)
+FONT = pygame.font.SysFont("Lucida Console", 12)
 
 OPACITY = 191
 

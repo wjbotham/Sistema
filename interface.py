@@ -14,7 +14,7 @@ class Interface:
         #create the screen
         self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self._origin = self.universe.center_of_mass()
-        self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.05/min(height,width)
+        self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.25/min(height,width)
 
         self.ui_elements = [ObjectInfoBox(self,100,100)]
         self.grabbed_element = None
@@ -82,13 +82,23 @@ class Interface:
                         self.grabbed_element.abs_y += dy
                         self.update()
                 elif event.type == pygame.VIDEORESIZE:
-                    self.window = pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                    self.resize(event.size)
                     # TODO Move floaty windows so they don't get lost outside of the display area
                     # TODO Figure out how to avoid the ugly streaking when resized larger
-                    self.update()
                 else:
                     print(event)
 
+    def resize(self,size):
+        if size[0] < 300:
+            size = (300,size[1])
+        if size[1] < 300:
+            size = (size[0],300)
+        for e in self.ui_elements:
+            e.abs_x *= size[0]/self.width
+            e.abs_y *= size[1]/self.height
+        self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
+        self.update()
+        
     def handle_click(self,event):
         # if left mouse release, release a grabbed element
         if self.grabbed_element and event.type == pygame.MOUSEBUTTONUP and event.button == 1:
@@ -171,7 +181,7 @@ class Interface:
             pause_status = "Paused"
         else:
             pause_status = "Running"
-        self.draw_text(["%.2E" % self.km_per_pixel, "T+%d" % self.universe.time, pause_status], 1, 1, LIGHT_GRAY, BLACK)
+        self.draw_text(["%.2E" % self.km_per_pixel, "T+%d.%d hours" % (round(self.universe.time-0.5),(self.universe.time*10)%10), pause_status], 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
         for element in reversed(self.ui_elements):

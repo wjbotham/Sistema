@@ -84,10 +84,10 @@ class ObjectInfoBox(UIElement):
         #self.children.append(Button(self,25,25,60,15,DARK_GREEN,BLACK,"Test Button",lambda: print("Click!")))
         def body_info():
             s = self.interface().selected
-            return ["Name: %s" % s.name,
-                    "Mass: %.2E kg" % s.mass,
+            return ["  Name: %s" % s.name,
+                    "  Mass: %.2E kg" % s.mass,
                     "Radius: %.2E km" % s.radius]
-        self.children.append(Label(self,1,1+header.height,None,BLACK,body_info))
+        self.children.append(Label(self,0,2+header.height,None,BLACK,body_info))
 
     def surface(self):
         s = pygame.Surface((self.width,self.height), pygame.SRCALPHA)
@@ -116,7 +116,7 @@ class Button(UIElement):
         UIElement.__init__(self,parent,x,y,width,height,background_color)
         label = Label(self,0,0,None,text_color,text)
         label.rel_x = (self.width-label.width)/2
-        label.rel_y = (self.height-label.height)/2
+        label.rel_y = (self.height-label.height)/2 
         self.children.append(label)
         self.action = action
 
@@ -160,12 +160,14 @@ class Label(UIElement):
             canvas.set_alpha(OPACITY)
             return canvas
         if isinstance(self.text,str):
-            s = str_to_canvas(self.text)
+            l = str_to_canvas(self.text)
+            s = pygame.Surface((5+l.get_width(),l.get_height()), pygame.SRCALPHA)
+            s.blit(l,(5,0))
         elif isinstance(self.text,list):
             s_ary = list(map(str_to_canvas,self.text))
-            s = pygame.Surface((max(l.get_width() for l in s_ary),sum(l.get_height() for l in s_ary)), pygame.SRCALPHA)
+            s = pygame.Surface((5+max(l.get_width() for l in s_ary),sum(l.get_height() for l in s_ary)), pygame.SRCALPHA)
             y = 0
             for l in s_ary:
-                s.blit(l,(0,y))
+                s.blit(l,(5,y))
                 y = y + l.get_height()
         return s
