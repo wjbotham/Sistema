@@ -5,7 +5,7 @@ from vector import Vector
 from time import clock
 
 class Universe:
-    def __init__(self,generator,paused=True,G = 8.6493e-15):
+    def __init__(self,generator,paused=True,G = 8.648208e-15):
         self.bodies = []
         self.time = 0
         # gravitational constant is in kilometers cubed per kilogram per turn squared
