@@ -97,10 +97,10 @@ class Universe:
         while self.view:
             while clock() < next_turn:
                 if self.paused:
-                    time_left = next_turn - clock()
+                    turn_left = (next_turn - clock()) / seconds_per_turn
                     while self.paused and self.view:
                         pass
-                    next_turn = clock() + time_left
+                    next_turn = clock() + turn_left * seconds_per_turn
                 pass
             self.pass_turn()
             next_turn += seconds_per_turn
