@@ -183,7 +183,10 @@ class Interface:
         else:
             pause_status = "Running"
         
-        self.draw_text(["%.2E" % self.km_per_pixel, "T+%d turns" % (self.universe.time-0.5), pause_status], 1, 1, LIGHT_GRAY, BLACK)
+        self.draw_text(["%.2E" % self.km_per_pixel,
+                        "T+%.1f hours" % (self.universe.time/10),
+                        "%d future turns cached" % (self.universe.last_cached_turn - self.universe.time),
+                        pause_status], 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
         for element in reversed(self.ui_elements):

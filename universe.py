@@ -1,6 +1,6 @@
 from math import ceil,sqrt
 from interface import Interface
-from threading import Thread
+from threading import Thread, Lock
 from vector import Vector
 from time import clock
 
@@ -15,9 +15,39 @@ class Universe:
         self.paused = paused
         self.generator = generator
         self.sun = None
+        self.physics_locks = {}
+
+    def get_last_cached_turn(self):
+        return min(max(body.physics_cache.keys()) for body in self.bodies)
+    last_cached_turn = property(get_last_cached_turn)
+
+    def get_seconds_per_calc(self):
+        seconds_since_start = clock() - self.start_time
+        if self.time < 10:
+            return seconds_since_start / 10
+        else:
+            return seconds_since_start / self.time
+    seconds_per_calc = property(get_seconds_per_calc)
+
+    def calculate_physics(self, turn):
+        if turn not in self.physics_locks:
+            self.physics_locks[turn] = Lock()
+        self.physics_locks[turn].acquire()
+        if self.last_cached_turn < turn-1:
+            # if we don't have the previous turn's state, calculate it now
+            self.calculate_physics(turn-1)
+        for body in [i for i in self.bodies if turn not in i.physics_cache]:
+                gravity_sum = sum(body.attraction(other, turn-1) for other in self.bodies if other != body)
+                body.physics_cache[turn] = {
+                    "position": body.get_position(turn-1) + body.get_velocity(turn-1),
+                    "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass)
+                }
+        self.physics_locks[turn].release()
+        # TODO remove this update call when we stop displaying cached turns
+        if self.view:
+            self.view.update()
 
     def pass_turn(self):
-        print(self.time)
         self.time += 1
         dev = self.generator.generate_development()
         if dev:
@@ -40,6 +70,16 @@ class Universe:
         self.view = Interface(self)
         self.view.ui_loop()
 
+    def physics_cache_loop(self):
+        while not self.view:
+            pass
+        next_calc = clock() + (0.5 * self.seconds_per_calc)
+        while self.view:
+            while clock() < next_calc:
+                pass
+            self.calculate_physics(self.last_cached_turn + 1)
+            next_calc += self.seconds_per_calc
+
     def describe_system(self):
         plural = "s"
         if self.time == 1:
@@ -55,8 +95,11 @@ class Universe:
         print()
 
     def run(self):
-        t = Thread(target=self.ui_loop)
-        t.start()
+        self.start_time = clock()
+        ui_t = Thread(target=self.ui_loop)
+        ui_t.start()
+        phys_t = Thread(target=self.physics_cache_loop)
+        phys_t.start()
         while not self.view:
             pass
         seconds_per_turn = 1
@@ -65,7 +108,7 @@ class Universe:
             while clock() < next_turn:
                 if self.paused:
                     time_left = next_turn - clock()
-                    while self.paused:
+                    while self.paused and self.view:
                         pass
                     next_turn = clock() + time_left
                 pass

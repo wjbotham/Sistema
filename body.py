@@ -11,25 +11,15 @@ class Body:
         t = self.universe.time
         self.physics_cache = {t: {"position": position, "velocity": velocity}}
         self.color = color
-
-    def calculate_physics(self, turn):
-        last_cached_turn = max(self.physics_cache.keys())
-        assert(last_cached_turn < turn)
-        for i in range(last_cached_turn, turn):
-            gravity_sum = sum(self.attraction(other, i) for other in self.universe.bodies if other != self)
-            self.physics_cache[i+1] = {
-                "position": self.get_position(i) + self.get_velocity(i),
-                "velocity": self.get_velocity(i) + (gravity_sum / self.mass)
-            }
             
     def get_velocity(self, turn):
         if turn not in self.physics_cache:
-            self.calculate_physics(turn)
+            self.universe.calculate_physics(turn)
         return self.physics_cache[turn]["velocity"]
 
     def get_position(self, turn):
         if turn not in self.physics_cache:
-            self.calculate_physics(turn)
+            self.universe.calculate_physics(turn)
         return self.physics_cache[turn]["position"]
 
     '''
