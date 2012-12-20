@@ -21,14 +21,6 @@ class Universe:
         return min(max(body.physics_cache.keys()) for body in self.bodies)
     last_cached_turn = property(get_last_cached_turn)
 
-    def get_seconds_per_calc(self):
-        seconds_since_start = clock() - self.start_time
-        if self.time < 10:
-            return seconds_since_start / 10
-        else:
-            return seconds_since_start / self.time
-    seconds_per_calc = property(get_seconds_per_calc)
-
     def calculate_physics(self, turn):
         if turn not in self.physics_locks:
             self.physics_locks[turn] = Lock()
@@ -43,7 +35,7 @@ class Universe:
                     "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass)
                 }
         self.physics_locks[turn].release()
-        # TODO remove this update call when we stop displaying cached turns
+        # TODO make this update call conditional on our displaying cached turns
         if self.view:
             self.view.update()
 
@@ -73,12 +65,10 @@ class Universe:
     def physics_cache_loop(self):
         while not self.view:
             pass
-        next_calc = clock() + (0.5 * self.seconds_per_calc)
         while self.view:
-            while clock() < next_calc:
+            while self.last_cached_turn > (2 * self.time) + 10:
                 pass
             self.calculate_physics(self.last_cached_turn + 1)
-            next_calc += self.seconds_per_calc
 
     def describe_system(self):
         plural = "s"
