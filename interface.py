@@ -14,7 +14,7 @@ class Interface:
         #create the screen
         self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self._origin = self.universe.center_of_mass()
-        self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.25/min(height,width)
+        self._km_per_pixel = max((body.get_position(self.universe.time) - self.origin).magnitude() for body in self.universe.bodies)*1.25/min(height,width)
 
         self.ui_elements = [ObjectInfoBox(self,100,100)]
         self.grabbed_element = None
@@ -148,7 +148,8 @@ class Interface:
         ev_x,ev_y = event.pos
         candidates = []
         for body in self.universe.bodies:
-            b_x,b_y = self.km_to_px(body.position.x,body.position.y)
+            b_x,b_y = self.km_to_px(body.get_position(self.universe.time).x,
+                                    body.get_position(self.universe.time).y)
             dist = sqrt((ev_x-b_x)**2 + (ev_y-b_y)**2)
             if dist <= 10 + self.pixel_radius(body):
                 candidates.append(body)                    
@@ -171,8 +172,8 @@ class Interface:
 
     def update(self):
         if self.selected:
-            x = self.selected.position.x
-            y = self.selected.position.y
+            x = self.selected.get_position(self.universe.time).x
+            y = self.selected.get_position(self.universe.time).y
             self.origin = Vector(x,y,0)
         else:
             self.origin = self.universe.center_of_mass()
@@ -181,7 +182,8 @@ class Interface:
             pause_status = "Paused"
         else:
             pause_status = "Running"
-        self.draw_text(["%.2E" % self.km_per_pixel, "T+%d.%d hours" % (round(self.universe.time-0.5),(self.universe.time*10)%10), pause_status], 1, 1, LIGHT_GRAY, BLACK)
+        
+        self.draw_text(["%.2E" % self.km_per_pixel, "T+%d turns" % (self.universe.time-0.5), pause_status], 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
         for element in reversed(self.ui_elements):
@@ -192,7 +194,8 @@ class Interface:
         pygame.display.flip()
 
     def draw_body(self,body):
-        pos = self.km_to_px(body.position.x,body.position.y)
+        pos = self.km_to_px(body.get_position(self.universe.time).x,
+                            body.get_position(self.universe.time).y)
         pixel_radius = self.pixel_radius(body)
         visible_x = (-pixel_radius <= pos[0] <= self.width  + pixel_radius)
         visible_y = (-pixel_radius <= pos[1] <= self.height + pixel_radius)

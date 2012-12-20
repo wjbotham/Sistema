@@ -5,18 +5,33 @@ class Body:
     def __init__(self,name,mass,density,color=(255,255,255),position=Vector(),velocity=Vector(),universe=None):
         self.name = name
         self.universe = universe
+        self.universe.bodies.append(self)
         self.mass = mass
         self.radius = (3*mass/4/pi/density)**(1/3)
-        self.position = position
-        self.velocity = velocity
+        t = self.universe.time
+        self.physics_cache = {t: {"position": position, "velocity": velocity}}
         self.color = color
 
-    def apply_velocity(self):
-        self.position += self.velocity
+    def calculate_physics(self, turn):
+        last_cached_turn = max(self.physics_cache.keys())
+        assert(last_cached_turn < turn)
+        for i in range(last_cached_turn, turn):
+            gravity_sum = sum(self.attraction(other, i) for other in self.universe.bodies if other != self)
+            self.physics_cache[i+1] = {
+                "position": self.get_position(i) + self.get_velocity(i),
+                "velocity": self.get_velocity(i) + (gravity_sum / self.mass)
+            }
+            
+    def get_velocity(self, turn):
+        if turn not in self.physics_cache:
+            self.calculate_physics(turn)
+        return self.physics_cache[turn]["velocity"]
 
-    def apply_gravity(self):
-        gravity_sum = sum(self.attraction(other) for other in self.universe.bodies if other != self)
-        self.velocity += gravity_sum / self.mass
+    def get_position(self, turn):
+        if turn not in self.physics_cache:
+            self.calculate_physics(turn)
+        return self.physics_cache[turn]["position"]
+
     '''
     progression: the satellite's current progression around the ellipse
         0 is at the positive semi-major axis, pi/2 is at the positive semi-minor axis
@@ -35,11 +50,12 @@ class Body:
         x = cos(progression)*semimajor_axis + d_focus_to_center
         y = sin(progression)*semiminor_axis
         rel_pos = Vector(y,x,0).rotated(0,incl_angle).rotated(theta,phi-incl_angle)
-        position = self.position + rel_pos
+        position = self.get_position(self.universe.time) + rel_pos
 
         # calculate orbit speed
         stan_grav_param = self.universe.G * (self.mass + mass)
-        rel_vel_magnitude = sqrt(stan_grav_param * (2/rel_pos.magnitude() - 1/semimajor_axis))
+        rel_vel_magnitude = sqrt(stan_grav_param * (2/rel_pos.magnitude() -
+                                                    1/semimajor_axis))
 
         # calculate orbit direction
         dx = -sin(progression)*semimajor_axis
@@ -49,23 +65,25 @@ class Body:
             rel_vel_direction = -rel_vel_direction
         
         rel_vel = rel_vel_direction * rel_vel_magnitude
-        velocity = self.velocity + rel_vel
-        self.universe.add_body(Body(name,mass,density,color,position,velocity))
+        velocity = self.get_velocity(self.universe.time) + rel_vel
+        Body(name, mass, density, color, position, velocity, universe=self.universe)
 
-    def attraction(self,other):
-        rel_pos = other.position - self.position
+    def attraction(self, other, turn):
+        rel_pos = other.get_position(turn) - self.get_position(turn)
         magnitude = (self.universe.G * self.mass * other.mass) / (rel_pos*rel_pos)
         unit_vector = rel_pos.normalized()
         return unit_vector * magnitude
 
-    def angle_phi(self,other):
-        rel_pos = self.position - other.position
+    def angle_phi(self, other, turn):
+        rel_pos = self.get_position(turn) - other.get_position(turn)
         unit_vector = rel_pos.normalized()
         return acos(unit_vector.z/rel_pos.magnitude())/pi
 
-    def angle_theta(self,other):
-        unit_vector = (self.position - other.position).normalized()
+    def angle_theta(self, other, turn):
+        unit_vector = (self.get_position(turn) - other.get_position(turn)).normalized()
         return atan2(unit_vector.y,unit_vector.x)/pi
 
-    def distance(self,other):
-        return (self.position - other.position).magnitude()
+    def distance(self, other, turn=None):
+        if (turn is None):
+            turn = self.universe.time
+        return (self.get_position(turn) - other.get_position(turn)).magnitude()

@@ -16,16 +16,9 @@ class Universe:
         self.generator = generator
         self.sun = None
 
-    def add_body(self,body):
-        body.universe = self
-        self.bodies.append(body)
-
     def pass_turn(self):
-        self.time += 0.1
-        for body in self.bodies:
-            body.apply_velocity()
-        for body in self.bodies:
-            body.apply_gravity()
+        print(self.time)
+        self.time += 1
         dev = self.generator.generate_development()
         if dev:
             print("Development: %d at t=%d" % (dev,self.time))
@@ -36,7 +29,7 @@ class Universe:
         total_mass = sum(body.mass for body in self.bodies)
         if total_mass == 0:
             return Vector(0,0,0)
-        return sum((body.position * body.mass) for body in self.bodies)/total_mass
+        return sum((body.get_position(self.time) * body.mass) for body in self.bodies)/total_mass
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
@@ -51,7 +44,7 @@ class Universe:
         plural = "s"
         if self.time == 1:
             plural = ""
-        print("time = "+str(self.time)+" hour"+plural)
+        print("time = "+str(self.time)+" turn"+plural)
         sun = self.bodies[0]
         print(sun.name+": mass="+('%.2E' % sun.mass))
         for i in range(1,len(self.bodies)):
