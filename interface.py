@@ -13,7 +13,7 @@ class Interface:
         
         #create the screen
         self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-        self._origin = self.universe.center_of_mass()
+        self._origin = self.universe.center_of_mass
         self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.25/min(height,width)
 
         self.ui_elements = [ObjectInfoBox(self,100,100)]
@@ -126,16 +126,22 @@ class Interface:
             self.update()
         elif event.unicode == '1':
             self.universe.seconds_per_turn = 360
+            self.update()
         elif event.unicode == '2':
             self.universe.seconds_per_turn = 10
+            self.update()
         elif event.unicode == '3':
             self.universe.seconds_per_turn = 1
+            self.update()
         elif event.unicode == '4':
             self.universe.seconds_per_turn = 0.5
+            self.update()
         elif event.unicode == '5':
             self.universe.seconds_per_turn = 0.2
+            self.update()
         elif event.unicode == '6':
             self.universe.seconds_per_turn = 0.1
+            self.update()
 
     def handle_left_mouse_up(self,event):
         self.grabbed_element = None
@@ -188,17 +194,18 @@ class Interface:
             y = self.selected.position.y
             self.origin = Vector(x,y,0)
         else:
-            self.origin = self.universe.center_of_mass()
+            self.origin = self.universe.center_of_mass
         self.window.fill(BLACK)
+        time_flow = 360/self.universe.seconds_per_turn
         if self.universe.paused:
             pause_status = "Paused"
         else:
             pause_status = "Running"
-
+        time_info = "%dx (%s)" % (time_flow, pause_status)
         self.draw_text(["%.2E" % self.km_per_pixel,
                         "T+%.1f hours" % (self.universe.time/10),
                         "%d future turns cached" % (self.universe.last_cached_turn - self.universe.time),
-                        pause_status], 1, 1, LIGHT_GRAY, BLACK)
+                        time_info], 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
         for element in reversed(self.ui_elements):

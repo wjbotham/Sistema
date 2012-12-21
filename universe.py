@@ -45,6 +45,13 @@ class Universe:
         self._turn_left = self.turn_left
     paused = property(get_paused, set_paused)
 
+    def get_center_of_mass(self):
+        total_mass = sum(body.mass for body in self.bodies)
+        if total_mass == 0:
+            return Vector(0,0,0)
+        return sum((body.get_position(self.time) * body.mass) for body in self.bodies)/total_mass
+    center_of_mass = property(get_center_of_mass)
+
     def calculate_physics(self, turn):
         if turn not in self.physics_locks:
             self.physics_locks[turn] = Lock()
@@ -70,12 +77,6 @@ class Universe:
             print("Development: %d at t=%d" % (dev,self.time))
         if self.view:
             self.view.update()
-
-    def center_of_mass(self):
-        total_mass = sum(body.mass for body in self.bodies)
-        if total_mass == 0:
-            return Vector(0,0,0)
-        return sum((body.get_position(self.time) * body.mass) for body in self.bodies)/total_mass
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
