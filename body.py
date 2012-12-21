@@ -16,11 +16,13 @@ class Body:
         if turn not in self.physics_cache:
             self.universe.calculate_physics(turn)
         return self.physics_cache[turn]["velocity"]
+    velocity = property(lambda self: self.get_velocity(self.universe.time))
 
     def get_position(self, turn):
         if turn not in self.physics_cache:
             self.universe.calculate_physics(turn)
         return self.physics_cache[turn]["position"]
+    position = property(lambda self: self.get_position(self.universe.time))
 
     '''
     progression: the satellite's current progression around the ellipse
@@ -40,7 +42,7 @@ class Body:
         x = cos(progression)*semimajor_axis + d_focus_to_center
         y = sin(progression)*semiminor_axis
         rel_pos = Vector(y,x,0).rotated(0,incl_angle).rotated(theta,phi-incl_angle)
-        position = self.get_position(self.universe.time) + rel_pos
+        position = self.position + rel_pos
 
         # calculate orbit speed
         stan_grav_param = self.universe.G * (self.mass + mass)
@@ -55,7 +57,7 @@ class Body:
             rel_vel_direction = -rel_vel_direction
         
         rel_vel = rel_vel_direction * rel_vel_magnitude
-        velocity = self.get_velocity(self.universe.time) + rel_vel
+        velocity = self.velocity + rel_vel
         Body(name, mass, density, color, position, velocity, universe=self.universe)
 
     def attraction(self, other, turn):
