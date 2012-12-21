@@ -124,6 +124,18 @@ class Interface:
         elif event.unicode == 'p' or event.unicode == 'P':
             self.universe.paused = not self.universe.paused
             self.update()
+        elif event.unicode == '1':
+            self.universe.seconds_per_turn = 360
+        elif event.unicode == '2':
+            self.universe.seconds_per_turn = 10
+        elif event.unicode == '3':
+            self.universe.seconds_per_turn = 1
+        elif event.unicode == '4':
+            self.universe.seconds_per_turn = 0.5
+        elif event.unicode == '5':
+            self.universe.seconds_per_turn = 0.2
+        elif event.unicode == '6':
+            self.universe.seconds_per_turn = 0.1
 
     def handle_left_mouse_up(self,event):
         self.grabbed_element = None
@@ -182,7 +194,7 @@ class Interface:
             pause_status = "Paused"
         else:
             pause_status = "Running"
-        
+
         self.draw_text(["%.2E" % self.km_per_pixel,
                         "T+%.1f hours" % (self.universe.time/10),
                         "%d future turns cached" % (self.universe.last_cached_turn - self.universe.time),

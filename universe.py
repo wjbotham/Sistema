@@ -12,14 +12,38 @@ class Universe:
         # 1 turn = 6 minutes
         self.G = G
         self.view = None
+        self._turn_left = 1
         self.paused = paused
         self.generator = generator
         self.sun = None
         self.physics_locks = {}
+        self.next_turn = clock() + 360
+        self._seconds_per_turn = 360
 
     def get_last_cached_turn(self):
         return min(max(body.physics_cache.keys()) for body in self.bodies)
     last_cached_turn = property(get_last_cached_turn)
+
+    def get_seconds_per_turn(self):
+        return self._seconds_per_turn
+    def set_seconds_per_turn(self, seconds_per_turn):
+        turn_left = (self.next_turn - clock()) / self._seconds_per_turn
+        self._seconds_per_turn = seconds_per_turn
+        self.next_turn = clock() + (turn_left * self._seconds_per_turn)
+    seconds_per_turn = property(get_seconds_per_turn, set_seconds_per_turn)
+
+    def get_turn_left(self):
+        if self.paused:
+            return self._turn_left
+        return (self.next_turn - clock()) / self.seconds_per_turn
+    turn_left = property(get_turn_left)
+
+    def get_paused(self):
+        return self._paused
+    def set_paused(self, paused):
+        self._paused = paused
+        self._turn_left = self.turn_left
+    paused = property(get_paused, set_paused)
 
     def calculate_physics(self, turn):
         if turn not in self.physics_locks:
@@ -92,15 +116,14 @@ class Universe:
         phys_t.start()
         while not self.view:
             pass
-        seconds_per_turn = 1
-        next_turn = clock() + seconds_per_turn
+        self.next_turn = clock() + self.seconds_per_turn
         while self.view:
-            while clock() < next_turn:
+            while clock() < self.next_turn:
                 if self.paused:
-                    turn_left = (next_turn - clock()) / seconds_per_turn
+                    turn_left = self.turn_left
                     while self.paused and self.view:
                         pass
-                    next_turn = clock() + turn_left * seconds_per_turn
+                    self.next_turn = clock() + (turn_left * self.seconds_per_turn)
                 pass
             self.pass_turn()
-            next_turn += seconds_per_turn
+            self.next_turn += self.seconds_per_turn
