@@ -108,20 +108,19 @@ class Interface:
                 return
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             self.handle_left_mouse_up(event)
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.handle_left_mouse_down(event)
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 3:
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
             self.handle_right_mouse_up(event)
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:            # this filter is here so we don't magnify to the point where it breaks,
+            # so fix that bug and then remove this TODO
+            if self.km_per_pixel / 1.75 > 2:
+                self.km_per_pixel /= 1.75
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
+            self.km_per_pixel *= 1.75
 
     def handle_key_down(self,event):
-        if event.unicode == 'a' or event.unicode == 'A':
-            self.km_per_pixel *= 1.9
-        elif event.unicode == 'z' or event.unicode == 'Z':
-            # this filter is here so we don't magnify to the point where it breaks,
-            # so fix that bug and then remove this TODO
-            if self.km_per_pixel / 1.9 > 2:
-                self.km_per_pixel /= 1.9
-        elif event.unicode == 'p' or event.unicode == 'P':
+        if event.unicode == 'p' or event.unicode == 'P':
             self.universe.paused = not self.universe.paused
             self.update()
         elif event.unicode == '1':
