@@ -77,6 +77,9 @@ class Universe:
             print("Development: %d at t=%d" % (dev,self.time))
         if self.view:
             self.view.update()
+        self.physics_locks.pop(self.time-1, None)
+        for body in self.bodies:
+            body.physics_cache.pop(self.time-1, None)
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
@@ -91,7 +94,7 @@ class Universe:
         while not self.view:
             pass
         while self.view:
-            while self.last_cached_turn > (2 * self.time) + 10:
+            while self.last_cached_turn > max(2 * self.time, 1000):
                 pass
             self.calculate_physics(self.last_cached_turn + 1)
 

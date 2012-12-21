@@ -205,6 +205,7 @@ class Interface:
         self.draw_text(["%.2E" % self.km_per_pixel,
                         "T+%.1f hours" % (self.universe.time/10),
                         "%d future turns cached" % (self.universe.last_cached_turn - self.universe.time),
+                        "%d total turns cached" % len(self.universe.physics_locks.keys()),
                         time_info], 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
