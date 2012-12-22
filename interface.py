@@ -3,6 +3,8 @@ from vector import Vector
 from math import sqrt
 from ui_element import ObjectInfoBox
 from style import *
+from time import clock
+from threading import Thread
 
 class Interface:
     def __init__(self,universe,width=1000,height=800):
@@ -18,7 +20,6 @@ class Interface:
 
         self.ui_elements = [ObjectInfoBox(self,100,100)]
         self.grabbed_element = None
-        self.update()
 
     def quit(self):
         pygame.quit()
@@ -34,7 +35,6 @@ class Interface:
         return self._km_per_pixel
     def set_km_per_pixel(self,km_per_pixel):
         self._km_per_pixel = km_per_pixel
-        self.update()
     km_per_pixel = property(get_km_per_pixel,set_km_per_pixel)
 
     def get_aspect_ratio(self):
@@ -53,19 +53,34 @@ class Interface:
         return self._selected
     def set_selected(self,selected):
         self._selected = selected
-        self.update()
     selected = property(get_selected,set_selected)
+
+    def get_fps(self):
+        return 1/self._seconds_per_frame
+    def set_fps(self, fps):
+        self._seconds_per_frame = 1/fps
+    fps = property(get_fps, set_fps)
 
     def get_top_element(self):
         return self.ui_elements[0]
     def set_top_element(self,element):
         self.ui_elements.remove(element)
         self.ui_elements.insert(0,element)
-        self.update()
     top_element = property(get_top_element,set_top_element)
 
+    def graphics_update_loop(self):
+        self.fps = 30
+        next_update = clock() + self._seconds_per_frame
+        while True:
+            while clock() < next_update:
+                pass
+            self.update()
+            next_update += self._seconds_per_frame
+
     def ui_loop(self):
-        while True: 
+        gu_t = Thread(target=self.graphics_update_loop)
+        gu_t.start()
+        while True:
             for event in pygame.event.get():
                 #print(event)
                 if event.type == pygame.QUIT:
@@ -80,7 +95,6 @@ class Interface:
                         dx,dy = event.rel
                         self.grabbed_element.abs_x += dx
                         self.grabbed_element.abs_y += dy
-                        self.update()
                 elif event.type == pygame.VIDEORESIZE:
                     self.resize(event.size)
                     # TODO Move floaty windows so they don't get lost outside of the display area
@@ -97,7 +111,6 @@ class Interface:
             e.abs_x *= size[0]/self.width
             e.abs_y *= size[1]/self.height
         self.window = pygame.display.set_mode(size, pygame.RESIZABLE)
-        self.update()
         
     def handle_click(self,event):
         # if left mouse release, release a grabbed element
@@ -122,25 +135,24 @@ class Interface:
     def handle_key_down(self,event):
         if event.unicode == 'p' or event.unicode == 'P':
             self.universe.paused = not self.universe.paused
-            self.update()
         elif event.unicode == '1':
             self.universe.seconds_per_turn = 360
-            self.update()
         elif event.unicode == '2':
             self.universe.seconds_per_turn = 10
-            self.update()
         elif event.unicode == '3':
             self.universe.seconds_per_turn = 1
-            self.update()
         elif event.unicode == '4':
             self.universe.seconds_per_turn = 0.5
-            self.update()
         elif event.unicode == '5':
             self.universe.seconds_per_turn = 0.2
-            self.update()
         elif event.unicode == '6':
             self.universe.seconds_per_turn = 0.1
-            self.update()
+        elif event.unicode == '7':
+            self.universe.seconds_per_turn = 0.05
+        elif event.unicode == '8':
+            self.universe.seconds_per_turn = 0.025
+        elif event.unicode == '9':
+            self.universe.seconds_per_turn = 0.0125
 
     def handle_left_mouse_up(self,event):
         self.grabbed_element = None

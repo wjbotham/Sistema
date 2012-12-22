@@ -66,17 +66,12 @@ class Universe:
                     "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass)
                 }
         self.physics_locks[turn].release()
-        # TODO make this update call conditional on our displaying cached turns
-        if self.view:
-            self.view.update()
 
     def pass_turn(self):
         self.time += 1
         dev = self.generator.generate_development()
         if dev:
             print("Development: %d at t=%d" % (dev,self.time))
-        if self.view:
-            self.view.update()
         self.physics_locks.pop(self.time-1, None)
         for body in self.bodies:
             body.physics_cache.pop(self.time-1, None)
