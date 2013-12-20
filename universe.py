@@ -65,15 +65,15 @@ class Universe:
             for other in (i for i in self.bodies if i != body):
                 # if the other is body's primary, use other's mass and body's system_mass
                 if body.primary == other:
-                    component = body.attraction(other, turn, True, False)
+                    component = body.attraction(other, turn-1, True, False)
                     gravity_sum += component
                     satellite_gravity_sum += component
                 # if the other is body's satellite, use other's system_mass and body's mass
                 elif body == other.primary:
-                    gravity_sum += body.attraction(other, turn, False, True)
+                    gravity_sum += body.attraction(other, turn-1, False, True)
                 # if we are satellites of the same primary, use system_mass of each
                 elif body.primary == other.primary:
-                    component = body.attraction(other, turn, True, True)
+                    component = body.attraction(other, turn-1, True, True)
                     gravity_sum += component
                     satellite_gravity_sum += component
                 # otherwise, do not calculate an interaction
