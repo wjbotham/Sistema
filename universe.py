@@ -88,8 +88,14 @@ class Universe:
                 "position": body.get_position(turn-1) + body.get_velocity(turn-1),
                 "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass)
             }
-        # TODO ensure that body.satellite_change_in_velocity for this turn gets applied to all descendents
-        # TODO NECESSARY - this is currently broken without it!
+        # ensure that body.satellite_change_in_velocity for this turn gets applied to all descendents
+        def applySatelliteAcceleration(satellite, acceleration):
+            satellite.physics_cache[turn]["velocity"] += acceleration
+            for subsatellite in satellite.satellites:
+                applySatelliteAcceleration(subsatellite, acceleration)
+        for body in (i for i in self.bodies if turn in i.satellite_change_in_velocity):
+            for satellite in body.satellites:
+                applySatelliteAcceleration(satellite, i.satellite_change_in_velocity[turn])
         self.physics_locks[turn].release()
 
     def pass_turn(self):
