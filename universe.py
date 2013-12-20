@@ -60,11 +60,36 @@ class Universe:
             # if we don't have the previous turn's state, calculate it now
             self.calculate_physics(turn-1)
         for body in [i for i in self.bodies if turn not in i.physics_cache]:
-                gravity_sum = sum(body.attraction(other, turn-1) for other in self.bodies if other != body)
-                body.physics_cache[turn] = {
-                    "position": body.get_position(turn-1) + body.get_velocity(turn-1),
-                    "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass)
-                }
+            gravity_sum = 0
+            satellite_gravity_sum = 0
+            for other in (i for i in self.bodies if i != body):
+                # if the other is self's primary, use other's mass and self's system_mass
+                if self.primary == other:
+                    component = body.attraction(other, turn, True, False)
+                    gravity_sum += component
+                    satellite_gravity_sum += component
+                # if the other is self's satellite, use other's system_mass and self's mass
+                elif self == other.primary:
+                    gravity_sum += body.attraction(other, turn, False, True)
+                # if we are satellites of the same primary, use system_mass of each
+                elif self.primary == other.primary:
+                    component = body.attraction(other, turn, True, True)
+                    gravity_sum += component
+                    satellite_gravity_sum += component
+                # otherwise, do not calculate an interaction
+            change_in_velocity = gravity_sum / body.mass
+            if body.satellite_change_in_velocity == None:
+                body.satellite_change_in_velocity = {}
+            if turn not in body.satellite_change_in_velocity:
+                body.satellite_change_in_velocity[turn] = satellite_gravity_sum / body.mass
+            else:
+                body.satellite_change_in_velocity[turn] += satellite_gravity_sum / body.mass
+            body.physics_cache[turn] = {
+                "position": body.get_position(turn-1) + body.get_velocity(turn-1),
+                "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass)
+            }
+        # TODO ensure that body.satellite_change_in_velocity for this turn gets applied to all descendents
+        # TODO NECESSARY - this is currently broken without it!
         self.physics_locks[turn].release()
 
     def pass_turn(self):

@@ -88,9 +88,16 @@ class Body:
         velocity = self.velocity + rel_vel
         Body(name, mass, density, color, position, velocity, universe=self.universe)
 
-    def attraction(self, other, turn):
+    def attraction(self, other, turn, use_self_system_mass=False, use_other_system_mass=False):
+        self_mass = self.mass
+        if use_self_system_mass:
+            self_mass = self.system_mass
+        other_mass = other.mass
+        if use_other_system_mass:
+            other_mass = other.system_mass
+        # TODO add a notion of a 'system_position' which carries the center of mass of a system, since we're implicitly assuming the center of mass is the primary's center of mass
         rel_pos = other.get_position(turn) - self.get_position(turn)
-        magnitude = (self.universe.G * self.mass * other.mass) / (rel_pos*rel_pos)
+        magnitude = (self.universe.G * self_mass * other_mass) / (rel_pos*rel_pos)
         unit_vector = rel_pos.normalized()
         return unit_vector * magnitude
 
