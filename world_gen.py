@@ -40,6 +40,7 @@ class WorldGenerator:
         for i in range(1 + self.rng.randint(0,4) + self.rng.randint(0,4)):
             self.add_rocky_planet(sun)
         u.bodies.sort(key=lambda obj:obj.distance(sun))
+        u.make_system_tree()
         self.system_generated = True
         return u
 
