@@ -107,6 +107,21 @@ class Universe:
             print(bodyi.name+": dist=("+('%.2E' % dist)+"), orbit speed=("+('%.2E' % orbit_speed)+"), mass="+('%.2E' % bodyi.mass))
         print()
 
+    def make_system_tree(self, turn=None):
+        sorted_bodies = sorted(self.bodies, key=lambda b: b.mass)
+        for i in range(0,len(sorted_bodies)-1):
+            bodyi = sorted_bodies[i]
+            highest_influence = 0
+            primary = None
+            for j in range(i+1,len(sorted_bodies)):
+                bodyj = sorted_bodies[j]
+                dist = bodyi.distance(bodyj, turn)
+                influence = bodyj.mass / dist / dist
+                if influence > highest_influence:
+                    highest_influence = influence
+                    primary = bodyj
+            bodyi.primary = primary
+
     def run(self):
         self.start_time = clock()
         ui_t = Thread(target=self.ui_loop)

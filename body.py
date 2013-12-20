@@ -11,7 +11,35 @@ class Body:
         t = self.universe.time
         self.physics_cache = {t: {"position": position, "velocity": velocity}}
         self.color = color
-            
+        self._primary = None
+        # TODO: make adding/removing satellites (and therefore changing the system mass) happen in property methods
+        self.satellites = []
+        self._system_mass = mass
+
+    def get_primary(self):
+        return self._primary
+    def set_primary(self, primary):
+        # remove self from old primary's satellites
+        if (self._primary):
+            self._primary.satellites.remove(self)
+            self._primary.system_mass -= self.system_mass
+        # change primary
+        self._primary = primary
+        # add self to new primary's satellites
+        if self._primary:
+            self._primary.satellites.append(self)
+            self._primary.system_mass += self.system_mass
+    primary = property(get_primary, set_primary)
+
+    def get_system_mass(self):
+        return self._system_mass
+    def set_system_mass(self, system_mass):
+        change_in_mass = system_mass - self.system_mass
+        self._system_mass = system_mass
+        if self.primary:
+            self.primary.system_mass += change_in_mass
+    system_mass = property(get_system_mass, set_system_mass)
+
     def get_velocity(self, turn):
         if turn not in self.physics_cache:
             self.universe.calculate_physics(turn)
