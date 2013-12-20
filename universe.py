@@ -78,24 +78,20 @@ class Universe:
                     satellite_gravity_sum += component
                 # otherwise, do not calculate an interaction
             change_in_velocity = gravity_sum / body.mass
-            if body.satellite_change_in_velocity == None:
-                body.satellite_change_in_velocity = {}
-            if turn not in body.satellite_change_in_velocity:
-                body.satellite_change_in_velocity[turn] = satellite_gravity_sum / body.mass
-            else:
-                body.satellite_change_in_velocity[turn] += satellite_gravity_sum / body.mass
             body.physics_cache[turn] = {
                 "position": body.get_position(turn-1) + body.get_velocity(turn-1),
-                "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass)
+                "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass),
+                "satellite_accel": satellite_gravity_sum / body.mass
             }
-        # ensure that body.satellite_change_in_velocity for this turn gets applied to all descendents
+        # ensure that satellite_accel for this turn gets applied to all descendents
         def applySatelliteAcceleration(satellite, acceleration):
             satellite.physics_cache[turn]["velocity"] += acceleration
             for subsatellite in satellite.satellites:
                 applySatelliteAcceleration(subsatellite, acceleration)
-        for body in (i for i in self.bodies if turn in i.satellite_change_in_velocity):
+        for body in (i for i in self.bodies if "satellite_accel" in i.physics_cache[turn]):
             for satellite in body.satellites:
-                applySatelliteAcceleration(satellite, i.satellite_change_in_velocity[turn])
+                applySatelliteAcceleration(satellite, body.physics_cache[turn]["satellite_accel"])
+                del body.physics_cache[turn]["satellite_accel"]
         self.physics_locks[turn].release()
 
     def pass_turn(self):
