@@ -91,7 +91,7 @@ class Universe:
         for body in (i for i in self.bodies if "satellite_accel" in i.physics_cache[turn]):
             for satellite in body.satellites:
                 applySatelliteAcceleration(satellite, body.physics_cache[turn]["satellite_accel"])
-                del body.physics_cache[turn]["satellite_accel"]
+            del body.physics_cache[turn]["satellite_accel"]
         self.physics_locks[turn].release()
 
     def pass_turn(self):
