@@ -13,7 +13,7 @@ class Universe:
         self.G = G
         self.view = None
         self._turn_left = 1
-        self.paused = paused
+        self._paused = paused
         self.generator = generator
         self.sun = None
         self.physics_locks = {}
@@ -41,8 +41,15 @@ class Universe:
     def get_paused(self):
         return self._paused
     def set_paused(self, paused):
+        # if unpausing
+        if self.paused and not paused:
+            self.next_turn = clock() + (self._turn_left * self.seconds_per_turn)
+            # self._turn_left only has meaning while paused
+            del self._turn_left
+        # else if pausing
+        elif not self.paused and paused:
+            self._turn_left = self.turn_left
         self._paused = paused
-        self._turn_left = self.turn_left
     paused = property(get_paused, set_paused)
 
     def get_center_of_mass(self):
@@ -72,9 +79,10 @@ class Universe:
         dev = self.generator.generate_development()
         if dev:
             print("Development: %d at t=%d" % (dev,self.time))
-        self.physics_locks.pop(self.time-1, None)
+        old_time = self.time - 1
+        self.physics_locks.pop(old_time, None)
         for body in self.bodies:
-            body.physics_cache.pop(self.time-1, None)
+            body.physics_cache.pop(old_time, None)
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
@@ -117,12 +125,10 @@ class Universe:
             pass
         self.next_turn = clock() + self.seconds_per_turn
         while self.view:
-            while clock() < self.next_turn:
-                if self.paused:
-                    turn_left = self.turn_left
-                    while self.paused and self.view:
-                        pass
-                    self.next_turn = clock() + (turn_left * self.seconds_per_turn)
+            while (self.paused or clock() < self.next_turn) and self.view:
                 pass
-            self.pass_turn()
-            self.next_turn += self.seconds_per_turn
+            if (self.last_cached_turn <= self.time):
+                self.paused = True
+            else:
+                self.pass_turn()
+                self.next_turn += self.seconds_per_turn
