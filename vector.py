@@ -7,6 +7,12 @@ class Vector:
     def magnitude(self):
         return sqrt(self * self)
 
+    def __eq__(self,other):
+        if other.__class__ is Vector:
+            return self.coord() == other.coord()
+        else:
+            return False
+
     def __add__(self,other):
         if other == 0:
             # makes it possible to sum(vectors) with default init=0
