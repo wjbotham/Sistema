@@ -237,6 +237,7 @@ class Interface:
         # TODO: implement some way of tracking changes, then translate
         #       this to use pygame.display.update(rectangles)
         pygame.display.flip()
+        self.universe.graphics_goahead(self.universe.time - 1)
 
     def draw_body(self,body):
         pos = self.km_to_px(body.position.x,

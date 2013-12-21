@@ -17,8 +17,38 @@ class Universe:
         self.generator = generator
         self.sun = None
         self.physics_locks = {}
+        self.physics_cleanup_goaheads = {}
         self.next_turn = clock() + 360
         self._seconds_per_turn = 360
+
+    def game_loop_goahead(self, turn):
+        if turn not in self.physics_cleanup_goaheads:
+            self.physics_cleanup_goaheads[turn] = 0b01
+        else:
+            self.physics_cleanup_goaheads[turn] |= 0b01
+        self.check_goahead(turn)
+
+    def graphics_goahead(self, turn):
+        if turn not in self.physics_cleanup_goaheads:
+            self.physics_cleanup_goaheads[turn] = 0b10
+        else:
+            self.physics_cleanup_goaheads[turn] |= 0b10
+        self.check_goahead(turn)
+
+    def check_goahead(self, turn):
+        if self.physics_cleanup_goaheads[turn] == 0b11:
+            self.clean_physics_cache(turn)
+
+    def clean_physics_cache(self, turn):
+        if turn in self.physics_locks:
+            del self.physics_locks[turn]
+        for body in self.bodies:
+            if turn in body.physics_cache:
+                del body.physics_cache[turn]
+        if turn in self.physics_cleanup_goaheads:
+            del self.physics_cleanup_goaheads[turn]
+        if turn-1 in self.physics_locks:
+            self.clean_physics_cache(turn-1)
 
     def get_last_cached_turn(self):
         return min(max(body.physics_cache.keys()) for body in self.bodies)
@@ -108,9 +138,8 @@ class Universe:
         dev = self.generator.generate_development()
         if dev:
             print("Development: %d at t=%d" % (dev,self.time))
-        # TODO clean up old self.physics_locks and body.physics_cache objects
-        # (but only when both the game loop and the interface are definitively
-        # done with them!)
+        # give the goahead from our side to delete this record
+        self.game_loop_goahead(self.time - 1)
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
