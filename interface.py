@@ -125,16 +125,18 @@ class Interface:
             self.handle_left_mouse_down(event)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
             self.handle_right_mouse_up(event)
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:            # this filter is here so we don't magnify to the point where it breaks,
-            # so fix that bug and then remove this TODO
-            if self.km_per_pixel / 1.75 > 2:
-                self.km_per_pixel /= 1.75
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
+            self.zoomIn()
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
-            self.km_per_pixel *= 1.75
+            self.zoomOut()
 
     def handle_key_down(self,event):
         if event.unicode == 'p' or event.unicode == 'P':
             self.universe.paused = not self.universe.paused
+        elif event.unicode == '[':
+            self.zoomOut()
+        elif event.unicode == ']':
+            self.zoomIn()
         elif event.unicode == '1':
             self.universe.seconds_per_turn = 360
         elif event.unicode == '2':
@@ -170,6 +172,15 @@ class Interface:
             if self.selected:
                 print("%.2E" % subject.distance(self.selected))
                 
+    def zoomIn(self):
+        # this filter is here so we don't magnify to the point where it breaks,
+        # so fix that bug and then remove this TODO
+        if self.km_per_pixel / 1.75 > 2:
+            self.km_per_pixel /= 1.75
+
+    def zoomOut(self):
+        self.km_per_pixel *= 1.75
+
     def pixel_radius(self,body):
         return max(2,round(body.radius / self.km_per_pixel))
 
@@ -214,7 +225,7 @@ class Interface:
             pause_status = "Running"
         time_info = "%dx (%s)" % (time_flow, pause_status)
         self.draw_text(["%.2E" % self.km_per_pixel,
-                        "T+%.1f hours" % (self.universe.time/10),
+                        "T+%.3f hours" % ((self.universe.time + 1-self.universe.turn_left)/10),
                         "%d future turns cached" % (self.universe.last_cached_turn - self.universe.time),
                         "%d total turns cached" % len(self.universe.physics_locks.keys()),
                         time_info], 1, 1, LIGHT_GRAY, BLACK)
