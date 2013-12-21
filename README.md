@@ -3,8 +3,8 @@ Sistema
 
 To run unit tests:
 
-python3 -m unittest discover
+python3.2 -m unittest discover
 
 To run the dev loop:
 
-python3 -m main
+python3.2 -m main
