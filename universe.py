@@ -35,7 +35,7 @@ class Universe:
     def get_turn_left(self):
         if self.paused:
             return self._turn_left
-        return (self.next_turn - clock()) / self.seconds_per_turn
+        return max(0, self.next_turn - clock()) / self.seconds_per_turn
     turn_left = property(get_turn_left)
 
     def get_paused(self):
@@ -60,6 +60,8 @@ class Universe:
     center_of_mass = property(get_center_of_mass)
 
     def calculate_physics(self, turn):
+        if turn < 0:
+            raise Exception("turn="+str(turn)+" - Not supposed to be here!")
         if turn not in self.physics_locks:
             self.physics_locks[turn] = Lock()
         self.physics_locks[turn].acquire()
