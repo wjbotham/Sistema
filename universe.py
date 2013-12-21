@@ -20,6 +20,7 @@ class Universe:
         self.physics_cleanup_goaheads = {}
         self.next_turn = clock() + 360
         self._seconds_per_turn = 360
+        self.time_per_snapshot = 0
 
     def game_loop_goahead(self, turn):
         if turn not in self.physics_cleanup_goaheads:
@@ -156,7 +157,9 @@ class Universe:
         while self.view:
             while self.last_cached_turn > max(2 * self.time, 1000):
                 pass
+            start_time = clock()
             self.calculate_physics(self.last_cached_turn + 1)
+            self.time_per_snapshot = (clock() - start_time + self.time_per_snapshot*9) / 10
 
     def describe_system(self):
         plural = "s"
