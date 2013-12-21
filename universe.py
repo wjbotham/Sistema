@@ -79,10 +79,9 @@ class Universe:
         dev = self.generator.generate_development()
         if dev:
             print("Development: %d at t=%d" % (dev,self.time))
-        old_time = self.time - 1
-        self.physics_locks.pop(old_time, None)
-        for body in self.bodies:
-            body.physics_cache.pop(old_time, None)
+        # TODO clean up old self.physics_locks and body.physics_cache objects
+        # (but only when both the game loop and the interface are definitively
+        # done with them!)
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
