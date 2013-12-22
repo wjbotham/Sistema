@@ -110,7 +110,7 @@ class Universe:
         start_time = clock()
         while self.view:
             self.calculate_physics(self.physics_cache.latest + 1)
-            if self.time_per_snapshot < self.seconds_per_turn:
+            if self.time_per_snapshot < self.seconds_per_turn or self.paused:
                 self.physics_cache.garbage_collect(2)
             self.time_per_snapshot = (clock() - start_time + self.time_per_snapshot*9) / 10
             start_time = clock()
