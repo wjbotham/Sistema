@@ -2,7 +2,7 @@ import unittest
 from vector import Vector
 from math import sqrt
 
-class TestVectorFunctions(unittest.TestCase):
+class TestVector(unittest.TestCase):
     def setUp(self):
         self.zero_vector = Vector(0,0,0)
         self.test_vector = Vector(1,2,3)

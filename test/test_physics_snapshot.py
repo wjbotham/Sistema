@@ -1,9 +1,9 @@
 import unittest
-from threading import Thread
+from threading import Thread,ThreadError
 from physics_snapshot import PhysicsSnapshot
 import time
 
-class TestPhysicsSnapshotFunctions(unittest.TestCase):
+class TestPhysicsSnapshot(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -11,6 +11,11 @@ class TestPhysicsSnapshotFunctions(unittest.TestCase):
         ps = PhysicsSnapshot()
         self.assertTrue(not ps.ready)
         self.assertTrue(not ps.okay_to_delete)
+
+    def test_release(self):
+        ps = PhysicsSnapshot()
+        with self.assertRaises(ThreadError):
+            ps.release()
 
     def test_record(self):
         ps = PhysicsSnapshot()
