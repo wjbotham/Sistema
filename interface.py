@@ -226,8 +226,8 @@ class Interface:
         time_info = "%dx (%s)" % (time_flow, pause_status)
         self.draw_text(["%.2E" % self.km_per_pixel,
                         "T+%.3f hours" % ((self.universe.time + 1-self.universe.turn_left)/10),
-                        "%d future turns cached" % (self.universe.last_cached_turn - self.universe.time),
-                        "%d total turns cached" % len(self.universe.physics_locks.keys()),
+                        "%d future turns cached" % (self.universe.physics_cache.latest() - self.universe.time),
+                        "%d total turns cached" % self.universe.physics_cache.count(),
                         time_info,
                         "%.2fs per turn calculated" % self.universe.time_per_snapshot], 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
@@ -238,7 +238,7 @@ class Interface:
         # TODO: implement some way of tracking changes, then translate
         #       this to use pygame.display.update(rectangles)
         pygame.display.flip()
-        self.universe.graphics_goahead(self.universe.time - 1)
+        self.universe.physics_cache.graphics_loop_finish(self.universe.time - 1)
 
     def draw_body(self,body):
         pos = self.km_to_px(body.position.x,

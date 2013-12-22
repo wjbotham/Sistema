@@ -1,7 +1,8 @@
 from math import ceil,sqrt
 from interface import Interface
-from threading import Thread, Lock
+from threading import Thread
 from vector import Vector
+from physics_cache import PhysicsCache
 from time import clock
 
 class Universe:
@@ -16,44 +17,10 @@ class Universe:
         self._paused = paused
         self.generator = generator
         self.sun = None
-        self.physics_locks = {}
-        self.physics_cleanup_goaheads = {}
+        self.physics_cache = PhysicsCache()
         self.next_turn = clock() + 360
         self._seconds_per_turn = 360
         self.time_per_snapshot = 0
-
-    def game_loop_goahead(self, turn):
-        if turn not in self.physics_cleanup_goaheads:
-            self.physics_cleanup_goaheads[turn] = 0b01
-        else:
-            self.physics_cleanup_goaheads[turn] |= 0b01
-        self.check_goahead(turn)
-
-    def graphics_goahead(self, turn):
-        if turn not in self.physics_cleanup_goaheads:
-            self.physics_cleanup_goaheads[turn] = 0b10
-        else:
-            self.physics_cleanup_goaheads[turn] |= 0b10
-        self.check_goahead(turn)
-
-    def check_goahead(self, turn):
-        if self.physics_cleanup_goaheads[turn] == 0b11:
-            self.clean_physics_cache(turn)
-
-    def clean_physics_cache(self, turn):
-        if turn in self.physics_locks:
-            del self.physics_locks[turn]
-        for body in self.bodies:
-            if turn in body.physics_cache:
-                del body.physics_cache[turn]
-        if turn in self.physics_cleanup_goaheads:
-            del self.physics_cleanup_goaheads[turn]
-        if turn-1 in self.physics_locks:
-            self.clean_physics_cache(turn-1)
-
-    def get_last_cached_turn(self):
-        return min(max(body.physics_cache.keys()) for body in self.bodies)
-    last_cached_turn = property(get_last_cached_turn)
 
     def get_seconds_per_turn(self):
         return self._seconds_per_turn
@@ -93,46 +60,32 @@ class Universe:
     def calculate_physics(self, turn):
         if turn < 0:
             raise Exception("turn="+str(turn)+" - Not supposed to be here!")
-        if turn not in self.physics_locks:
-            self.physics_locks[turn] = Lock()
-        self.physics_locks[turn].acquire()
-        if self.last_cached_turn < turn-1:
-            # if we don't have the previous turn's state, calculate it now
-            self.calculate_physics(turn-1)
-        for body in [i for i in self.bodies if turn not in i.physics_cache]:
-            gravity_sum = 0
-            satellite_gravity_sum = 0
-            for other in (i for i in self.bodies if i != body):
-                # if the other is body's primary, use other's mass and body's system_mass
-                if body.primary == other:
-                    component = body.attraction(other, turn-1, True, False)
-                    gravity_sum += component
-                    satellite_gravity_sum += component
-                # if the other is body's satellite, use other's system_mass and body's mass
-                elif body == other.primary:
-                    gravity_sum += body.attraction(other, turn-1, False, True)
-                # if we are satellites of the same primary, use system_mass of each
-                elif body.primary == other.primary:
-                    component = body.attraction(other, turn-1, True, True)
-                    gravity_sum += component
-                    satellite_gravity_sum += component
-                # otherwise, do not calculate an interaction
-            change_in_velocity = gravity_sum / body.mass
-            body.physics_cache[turn] = {
-                "position": body.get_position(turn-1) + body.get_velocity(turn-1),
-                "velocity": body.get_velocity(turn-1) + (gravity_sum / body.mass),
-                "satellite_accel": satellite_gravity_sum / body.mass
-            }
-        # ensure that satellite_accel for this turn gets applied to all descendents
-        def applySatelliteAcceleration(satellite, acceleration):
-            satellite.physics_cache[turn]["velocity"] += acceleration
-            for subsatellite in satellite.satellites:
-                applySatelliteAcceleration(subsatellite, acceleration)
-        for body in (i for i in self.bodies if "satellite_accel" in i.physics_cache[turn]):
-            for satellite in body.satellites:
-                applySatelliteAcceleration(satellite, body.physics_cache[turn]["satellite_accel"])
-            del body.physics_cache[turn]["satellite_accel"]
-        self.physics_locks[turn].release()
+        self.physics_cache.acquire(turn)
+        if not self.physics_cache.has(turn):
+            for body in self.bodies:
+                gravity_sum = 0
+                satellite_gravity_sum = 0
+                for other in (i for i in self.bodies if i != body):
+                    # if the other is body's primary, use other's mass and body's system_mass
+                    if body.primary == other:
+                        component = body.attraction(other, turn-1, True, False)
+                        gravity_sum += component
+                        satellite_gravity_sum += component
+                    # if the other is body's satellite, use other's system_mass and body's mass
+                    elif body == other.primary:
+                        gravity_sum += body.attraction(other, turn-1, False, True)
+                    # if we are satellites of the same primary, use system_mass of each
+                    elif body.primary == other.primary:
+                        component = body.attraction(other, turn-1, True, True)
+                        gravity_sum += component
+                        satellite_gravity_sum += component
+                    # otherwise, do not calculate an interaction
+                change_in_velocity = gravity_sum / body.mass
+                position = body.get_position(turn-1) + body.get_velocity(turn-1)
+                velocity = body.get_velocity(turn-1) + (gravity_sum / body.mass)
+                sat_accel = satellite_gravity_sum / body.mass
+                self.physics_cache.record(turn, body, position, velocity, sat_accel)
+        self.physics_cache.release(turn)
 
     def pass_turn(self):
         self.time += 1
@@ -140,7 +93,7 @@ class Universe:
         if dev:
             print("Development: %d at t=%d" % (dev,self.time))
         # give the goahead from our side to delete this record
-        self.game_loop_goahead(self.time - 1)
+        self.physics_cache.game_loop_finish(self.time - 1)
 
     def travel_time(self,b1,b2,accel):
         velocity_diff = (b1.velocity - b2.velocity).magnitude()
@@ -155,10 +108,10 @@ class Universe:
         while not self.view:
             pass
         while self.view:
-            while self.last_cached_turn > max(2 * self.time, 1000):
+            while self.physics_cache.latest() > max(2 * self.time, 1000):
                 pass
             start_time = clock()
-            self.calculate_physics(self.last_cached_turn + 1)
+            self.calculate_physics(self.physics_cache.latest() + 1)
             self.time_per_snapshot = (clock() - start_time + self.time_per_snapshot*9) / 10
 
     def describe_system(self):
@@ -202,7 +155,7 @@ class Universe:
         while self.view:
             while (self.paused or clock() < self.next_turn) and self.view:
                 pass
-            if (self.last_cached_turn <= self.time):
+            if (self.physics_cache.latest() <= self.time):
                 self.paused = True
             else:
                 self.pass_turn()

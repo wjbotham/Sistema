@@ -8,8 +8,7 @@ class Body:
         self.universe.bodies.append(self)
         self.mass = mass
         self.radius = (3*mass/4/pi/density)**(1/3)
-        t = self.universe.time
-        self.physics_cache = {t: {"position": position, "velocity": velocity}}
+        self.universe.physics_cache.init_body(self, position, velocity)
         self.color = color
         self._primary = None
         # TODO: make adding/removing satellites (and therefore changing the system mass) happen in property methods
@@ -41,15 +40,15 @@ class Body:
     system_mass = property(get_system_mass, set_system_mass)
 
     def get_velocity(self, turn):
-        if turn not in self.physics_cache:
+        if not self.universe.physics_cache.has(turn):
             self.universe.calculate_physics(turn)
-        return self.physics_cache[turn]["velocity"]
+        return self.universe.physics_cache.fetch_velocity(self, turn)
     velocity = property(lambda self: self.get_velocity(self.universe.time))
 
     def get_position(self, turn):
-        if turn not in self.physics_cache:
+        if not self.universe.physics_cache.has(turn):
             self.universe.calculate_physics(turn)
-        return self.physics_cache[turn]["position"]
+        return self.universe.physics_cache.fetch_position(self, turn)
     position = property(lambda self: self.get_position(self.universe.time))
 
     '''
