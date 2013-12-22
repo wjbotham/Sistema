@@ -45,17 +45,20 @@ class PhysicsCache:
                 self._latest = turn
 
     def game_loop_finish(self, turn):
-        if turn in self._snapshots:
-            self._snapshots[turn].game_loop_finish()
-            self.game_loop_finish(turn-1)
+        _turn = turn
+        while _turn in self._snapshots:
+            self._snapshots[_turn].game_loop_finish()
+            _turn -= 1
 
     def graphics_loop_finish(self, turn):
-        if turn in self._snapshots:
-            self._snapshots[turn].graphics_loop_finish()
-            self.graphics_loop_finish(turn-1)
+        _turn = turn
+        while _turn in self._snapshots:
+            self._snapshots[_turn].graphics_loop_finish()
+            _turn -= 1
 
     def garbage_collect(self, limit=1):
-        if self._oldest != self._latest:
+        _limit = limit
+        while self._oldest != self._latest and _limit > 0:
             if self._snapshots[self._oldest].okay_to_delete:
                 del self._snapshots[self._oldest]
                 self._count -= 1
@@ -63,7 +66,9 @@ class PhysicsCache:
                 while i not in self._snapshots:
                     i += 1
                 self._oldest = i
-                self.garbage_collect(limit - 1)
+                _limit -= 1
+            else:
+                _limit = 0
 
     def fetch_velocity(self, body, turn):
         return self._snapshots[turn].kinematics[body].velocity
