@@ -1,7 +1,7 @@
 import unittest
 from physics_cache import PhysicsCache
 
-class TestPhysicsCacheFunctions(unittest.TestCase):
+class TestPhysicsCache(unittest.TestCase):
     def setUp(self):
         pass
 
