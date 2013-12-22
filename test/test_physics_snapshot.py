@@ -53,12 +53,12 @@ class TestPhysicsSnapshot(unittest.TestCase):
             ps.acquire()
             self.threadSwitch = True
             # wait long enough that the main thread acquires the snapshot
-            time.sleep(0.02)
+            time.sleep(0.05)
             # verify the main thread was blocked from flipping mainSwitch
             self.assertTrue(not mainSwitch)
             self.threadSwitch = False
             ps.release()
-            time.sleep(0.01)
+            time.sleep(0.1)
             # verify the main thread has taken over again and flipped
             # mainSwitch
             self.assertTrue(mainSwitch)

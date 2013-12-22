@@ -1,10 +1,10 @@
 import unittest
 from physics_cache import PhysicsCache
+from time import sleep
+
+catchup_time = 0.1
 
 class TestPhysicsCache(unittest.TestCase):
-    def setUp(self):
-        pass
-
     def test_latest(self):
         pc = PhysicsCache()
         self.assertEqual(pc.latest, 0)
@@ -13,7 +13,7 @@ class TestPhysicsCache(unittest.TestCase):
         pc.acquire(2)
         pc.release(2)
         self.assertEqual(pc.latest, 3)
-
+    
     def test_count(self):
         pc = PhysicsCache()
         count = len([i for i in pc._snapshots if pc._snapshots[i].ready])
@@ -49,10 +49,12 @@ class TestPhysicsCache(unittest.TestCase):
         # verify that game_loop_finish does not trigger collection by itself,
         # but does in conjunction with graphics_loop_finish
         pc.game_loop_finish(0)
+        sleep(catchup_time) # give the collector a moment
         self.assertEqual(pc.count, 3)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(pc.has(0))
         pc.graphics_loop_finish(0)
+        sleep(catchup_time) # give the collector a moment
         self.assertEqual(pc.count, 2)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(not pc.has(0))
@@ -60,10 +62,12 @@ class TestPhysicsCache(unittest.TestCase):
         # verify that graphics_loop_finish does not trigger collection by
         # itself, but does in conjunction with game_loop_finish
         pc.graphics_loop_finish(1)
+        sleep(catchup_time) # give the collector a moment
         self.assertEqual(pc.count, 2)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(pc.has(1))
         pc.game_loop_finish(1)
+        sleep(catchup_time) # give the collector a moment
         self.assertEqual(pc.count, 1)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(not pc.has(1))
@@ -78,6 +82,7 @@ class TestPhysicsCache(unittest.TestCase):
         # verify that deleting one snapshot also deletes earlier snapshots
         pc.graphics_loop_finish(1)
         pc.game_loop_finish(1)
+        sleep(catchup_time) # give the collector a moment
         self.assertEqual(pc.count, 1)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(not pc.has(0))
@@ -92,5 +97,5 @@ class TestPhysicsCache(unittest.TestCase):
         # verify that the latest snapshot will not permit itself to be deleted
         pc.graphics_loop_finish(1)
         pc.game_loop_finish(1)
-        self.assertEqual(pc.count, 1)
+        sleep(catchup_time) # give the collector a moment
         self.assertTrue(pc.has(1))
