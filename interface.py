@@ -226,8 +226,8 @@ class Interface:
         time_info = "%dx (%s)" % (time_flow, pause_status)
         self.draw_text(["%.2E" % self.km_per_pixel,
                         "T+%.3f hours" % ((self.universe.time + 1-self.universe.turn_left)/10),
-                        "%d future turns cached" % (self.universe.physics_cache.latest() - self.universe.time),
-                        "%d total turns cached" % self.universe.physics_cache.count(),
+                        "%d future turns cached" % (self.universe.physics_cache.latest - self.universe.time),
+                        "%d total turns cached" % self.universe.physics_cache.count,
                         time_info,
                         "%.2fs per turn calculated" % self.universe.time_per_snapshot], 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):

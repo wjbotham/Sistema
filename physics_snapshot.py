@@ -8,6 +8,7 @@ class PhysicsSnapshot:
         self.ready = False
         self.game_loop_done = False
         self.graphics_loop_done = False
+        self.being_deleted = False
 
     def acquire(self):
         self.lock.acquire()

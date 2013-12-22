@@ -107,12 +107,11 @@ class Universe:
     def physics_cache_loop(self):
         while not self.view:
             pass
+        start_time = clock()
         while self.view:
-            while self.physics_cache.latest() > max(2 * self.time, 1000):
-                pass
-            start_time = clock()
-            self.calculate_physics(self.physics_cache.latest() + 1)
+            self.calculate_physics(self.physics_cache.latest + 1)
             self.time_per_snapshot = (clock() - start_time + self.time_per_snapshot*9) / 10
+            start_time = clock()
 
     def describe_system(self):
         plural = "s"
@@ -155,7 +154,7 @@ class Universe:
         while self.view:
             while (self.paused or clock() < self.next_turn) and self.view:
                 pass
-            if (self.physics_cache.latest() <= self.time):
+            if (self.physics_cache.latest <= self.time):
                 self.paused = True
             else:
                 self.pass_turn()
