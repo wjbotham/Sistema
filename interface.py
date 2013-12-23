@@ -20,10 +20,15 @@ class Interface:
 
         self.ui_elements = [ObjectInfoBox(self,100,100)]
         self.grabbed_element = None
+        self.running = False
+        self.graphics_finished = False
 
     def quit(self):
+        self.universe.stop()
+        self.running = False
+        while (not self.graphics_finished):
+            pass
         pygame.quit()
-        self.universe.view = None
 
     def get_origin(self):
         return self._origin
@@ -71,16 +76,18 @@ class Interface:
     def graphics_update_loop(self):
         self.fps = 30
         next_update = clock() + self._seconds_per_frame
-        while True:
+        while self.running:
             while clock() < next_update:
                 pass
             self.update()
             next_update += self._seconds_per_frame
+        self.graphics_finished = True
 
     def ui_loop(self):
         gu_t = Thread(target=self.graphics_update_loop)
+        self.running = True
         gu_t.start()
-        while True:
+        while self.running:
             for event in pygame.event.get():
                 #print(event)
                 if event.type == pygame.QUIT:
@@ -218,18 +225,28 @@ class Interface:
         else:
             self.origin = self.universe.center_of_mass
         self.window.fill(BLACK)
-        time_flow = 360/self.universe.seconds_per_turn
         if self.universe.paused:
             pause_status = "Paused"
         else:
             pause_status = "Running"
-        time_info = "%dx (%s)" % (time_flow, pause_status)
-        self.draw_text(["%.2E" % self.km_per_pixel,
-                        "T+%.3f hours" % ((self.universe.time + 1-self.universe.turn_left)/10),
-                        "%d future turns cached" % (self.universe.physics_cache.latest - self.universe.time),
-                        "%d total turns cached" % self.universe.physics_cache.count,
-                        time_info,
-                        "%.2fs per turn calculated" % self.universe.time_per_snapshot], 1, 1, LIGHT_GRAY, BLACK)
+        text_list = []
+        #text_list.append("%.2E" % self.km_per_pixel)
+        turns_since_start = self.universe.time + 1 - self.universe.turn_left
+        days = floor(turns_since_start / 240)
+        turns_since_start -= days * 240
+        hours = floor(turns_since_start / 10)
+        turns_since_start -= hours * 10
+        minutes = floor(turns_since_start * 6)
+        turns_since_start -= minutes / 6
+        seconds = floor(turns_since_start * 360)
+        text_list.append("%d days %02d hours %02d minutes %02d seconds" % (days, hours, minutes, seconds))
+        future_cached = self.universe.physics_cache.latest - self.universe.time
+        total_cached = self.universe.physics_cache.count
+        text_list.append("%d/%d turns cached" % (future_cached, total_cached))
+        text_list.append("%ss per hour experienced (%s)" % (str(round(self.universe.seconds_per_turn * 10, 2)), pause_status))
+        if self.universe.physics_cache.time_per_snapshot:
+            text_list.append("%.2fs per hour calculated" % (self.universe.physics_cache.time_per_snapshot*10))
+        self.draw_text(text_list, 1, 1, LIGHT_GRAY, BLACK)
         for body in sorted(self.universe.bodies,key=lambda b: b.mass):
             self.draw_body(body)
         for element in reversed(self.ui_elements):

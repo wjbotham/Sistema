@@ -17,10 +17,10 @@ class Universe:
         self._paused = paused
         self.generator = generator
         self.sun = None
-        self.physics_cache = PhysicsCache()
+        self.physics_cache = PhysicsCache(self)
         self.next_turn = clock() + 360
         self._seconds_per_turn = 360
-        self.time_per_snapshot = 0
+        self.running = False
 
     def get_seconds_per_turn(self):
         return self._seconds_per_turn
@@ -148,9 +148,10 @@ class Universe:
         ui_t.start()
         while not self.view:
             pass
-        phys_t = Thread(target=self.physics_cache_loop)
+        phys_t = Thread(target=self.physics_cache.loop)
         phys_t.start()
         self.next_turn = clock() + self.seconds_per_turn
+        self.running = True
         while self.view:
             while (self.paused or clock() < self.next_turn) and self.view:
                 pass
@@ -159,3 +160,8 @@ class Universe:
             else:
                 self.pass_turn()
                 self.next_turn += self.seconds_per_turn
+
+    def stop(self):
+        self.running = False
+        self.physics_cache.running = False
+        self.view = None

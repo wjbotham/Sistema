@@ -3,13 +3,17 @@ from threading import Thread
 from time import clock
 
 class PhysicsCache:
-    def __init__(self):
+    # TODO maybe we can remove `universe` as an argument someday
+    def __init__(self, universe=None):
         self._snapshots = {}
         self._snapshots[0] = PhysicsSnapshot()
         self._snapshots[0].ready = True
         self._latest = 0
         self._oldest = 0
         self._count = 1
+        self.running = False
+        self.universe = universe
+        self.time_per_snapshot = None
 
     def acquire(self, turn):
         if turn not in self._snapshots:
@@ -56,7 +60,7 @@ class PhysicsCache:
             self._snapshots[_turn].graphics_loop_finish()
             _turn -= 1
 
-    def garbage_collect(self, limit=1):
+    def _garbage_collect(self, limit=1):
         _limit = limit
         while self._oldest != self._latest and _limit > 0:
             if self._snapshots[self._oldest].okay_to_delete:
@@ -78,3 +82,16 @@ class PhysicsCache:
 
     def init_body(self, body, position, velocity):
         self._snapshots[0].record(body, position, velocity)
+
+    def loop(self):
+        self.running = True
+        start_time = clock()
+        while self.running:
+            self.universe.calculate_physics(self.latest+1)
+            self._garbage_collect()
+            if self.time_per_snapshot == None:
+                self.time_per_snapshot = clock() - start_time
+            else:
+                self.time_per_snapshot = (clock() - start_time + self.time_per_snapshot*19) / 20
+            start_time = clock()
+            

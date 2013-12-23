@@ -49,12 +49,12 @@ class TestPhysicsCache(unittest.TestCase):
         # verify that game_loop_finish does not permit collection by itself,
         # but does in conjunction with graphics_loop_finish
         pc.game_loop_finish(0)
-        pc.garbage_collect()
+        pc._garbage_collect()
         self.assertEqual(pc.count, 3)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(pc.has(0))
         pc.graphics_loop_finish(0)
-        pc.garbage_collect()
+        pc._garbage_collect()
         self.assertEqual(pc.count, 2)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(not pc.has(0))
@@ -62,12 +62,12 @@ class TestPhysicsCache(unittest.TestCase):
         # verify that graphics_loop_finish does not permit collection by
         # itself, but does in conjunction with game_loop_finish
         pc.graphics_loop_finish(1)
-        pc.garbage_collect()
+        pc._garbage_collect()
         self.assertEqual(pc.count, 2)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(pc.has(1))
         pc.game_loop_finish(1)
-        pc.garbage_collect()
+        pc._garbage_collect()
         self.assertEqual(pc.count, 1)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(not pc.has(1))
@@ -83,7 +83,7 @@ class TestPhysicsCache(unittest.TestCase):
         # snapshots to be okay_to_delete
         pc.graphics_loop_finish(1)
         pc.game_loop_finish(1)
-        pc.garbage_collect(2)
+        pc._garbage_collect(2)
         self.assertEqual(pc.count, 1)
         self.assertEqual(pc.latest, 2)
         self.assertTrue(not pc.has(0))
@@ -98,5 +98,5 @@ class TestPhysicsCache(unittest.TestCase):
         # verify that the latest snapshot will not permit itself to be deleted
         pc.graphics_loop_finish(1)
         pc.game_loop_finish(1)
-        pc.garbage_collect(2)
+        pc._garbage_collect(2)
         self.assertTrue(pc.has(1))
