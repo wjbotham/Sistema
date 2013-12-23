@@ -105,8 +105,6 @@ class Universe:
         self.view.ui_loop()
 
     def physics_cache_loop(self):
-        while not self.view:
-            pass
         start_time = clock()
         while self.view:
             self.calculate_physics(self.physics_cache.latest + 1)
@@ -148,10 +146,10 @@ class Universe:
         self.start_time = clock()
         ui_t = Thread(target=self.ui_loop)
         ui_t.start()
-        phys_t = Thread(target=self.physics_cache_loop)
-        phys_t.start()
         while not self.view:
             pass
+        phys_t = Thread(target=self.physics_cache_loop)
+        phys_t.start()
         self.next_turn = clock() + self.seconds_per_turn
         while self.view:
             while (self.paused or clock() < self.next_turn) and self.view:
