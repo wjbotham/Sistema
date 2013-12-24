@@ -30,6 +30,16 @@ class Body:
             self._primary.system_mass += self.system_mass
     primary = property(get_primary, set_primary)
 
+    '''
+    the center of mass of the system consisting of this body and all its
+    satellites/subsatellites/etc.
+    '''
+    def get_center_of_mass(self, turn):
+        sat_part = sum(sat.get_center_of_mass(turn) * sat.system_mass for sat in self.satellites)
+        own_part = self.get_position(turn) * self.mass
+        return (sat_part + own_part) / self.system_mass
+    center_of_mass = property(lambda self: self.get_center_of_mass(self.universe.time))
+
     def get_system_mass(self):
         return self._system_mass
     def set_system_mass(self, system_mass):
@@ -89,13 +99,16 @@ class Body:
 
     def attraction(self, other, turn, use_self_system_mass=False, use_other_system_mass=False):
         self_mass = self.mass
+        self_pos = self.get_position(turn)
         if use_self_system_mass:
             self_mass = self.system_mass
+            self_pos = self.get_center_of_mass(turn)
         other_mass = other.mass
+        other_pos = other.get_position(turn)
         if use_other_system_mass:
             other_mass = other.system_mass
-        # TODO add a notion of a 'system_position' which carries the center of mass of a system, since we're implicitly assuming the center of mass is the primary's center of mass
-        rel_pos = other.get_position(turn) - self.get_position(turn)
+            other_pos = other.get_center_of_mass(turn)
+        rel_pos = other_pos - self_pos
         magnitude = (self.universe.G * self_mass * other_mass) / (rel_pos*rel_pos)
         unit_vector = rel_pos.normalized()
         return unit_vector * magnitude
