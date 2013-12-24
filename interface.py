@@ -232,17 +232,29 @@ class Interface:
         text_list = []
         #text_list.append("%.2E" % self.km_per_pixel)
         turns_since_start = self.universe.time + 1 - self.universe.turn_left
-        days = floor(turns_since_start / 240)
-        turns_since_start -= days * 240
-        hours = floor(turns_since_start / 10)
-        turns_since_start -= hours * 10
-        minutes = floor(turns_since_start * 6)
-        turns_since_start -= minutes / 6
-        seconds = floor(turns_since_start * 360)
-        text_list.append("%d days %02d hours %02d minutes %02d seconds" % (days, hours, minutes, seconds))
+        def cool_time(turns, depth = 4):
+            output = []
+            days = floor(turns / 240)
+            turns -= days * 240
+            if depth >= 1:
+                output.append("%dd" % days)
+            hours = floor(turns / 10)
+            turns -= hours * 10
+            if depth >= 2:
+                output.append("%02dh" % hours)
+            minutes = floor(turns * 6)
+            turns -= minutes / 6
+            if depth >= 3:
+                output.append("%02dm" % minutes)
+            seconds = floor(turns * 360)
+            if depth >= 4:
+                output.append("%02ds" % seconds)
+            return " ".join(output)
+        text_list.append(cool_time(turns_since_start))
         future_cached = self.universe.physics_cache.latest - self.universe.time
         total_cached = self.universe.physics_cache.count
-        text_list.append("%d/%d turns cached" % (future_cached, total_cached))
+        text_list.append(cool_time(future_cached,2) + " cached")
+        text_list.append("%d turns waiting for collection" % (total_cached - future_cached - 1))
         text_list.append("%ss per hour experienced (%s)" % (str(round(self.universe.seconds_per_turn * 10, 2)), pause_status))
         if self.universe.physics_cache.time_per_snapshot:
             text_list.append("%.2fs per hour calculated" % (self.universe.physics_cache.time_per_snapshot*10))

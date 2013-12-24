@@ -49,16 +49,22 @@ class PhysicsCache:
                 self._latest = turn
 
     def game_loop_finish(self, turn):
-        _turn = turn
-        while _turn in self._snapshots:
-            self._snapshots[_turn].game_loop_finish()
-            _turn -= 1
+        self.loop_finish(turn, lambda x: x.game_loop_finish())
 
     def graphics_loop_finish(self, turn):
-        _turn = turn
-        while _turn in self._snapshots:
-            self._snapshots[_turn].graphics_loop_finish()
-            _turn -= 1
+        self.loop_finish(turn, lambda x: x.graphics_loop_finish())
+
+    '''
+    helper function for game_loop_finish and graphics_loop_finish
+    '''
+    def loop_finish(self, turn, action):
+        while turn in self._snapshots and not self._snapshots[turn].okay_to_delete:
+            try:
+                action(self._snapshots[turn])
+                turn -= 1
+            except KeyError:
+                # this happens if the snapshot gets garbage collected at exactly the right time
+                pass
 
     def _garbage_collect(self, limit=1):
         _limit = limit
