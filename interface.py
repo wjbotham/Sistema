@@ -1,6 +1,6 @@
 import pygame
 from vector import Vector
-from math import sqrt
+from math import sqrt,floor
 from ui_element import ObjectInfoBox
 from style import *
 from time import clock
