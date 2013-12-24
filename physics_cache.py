@@ -86,6 +86,14 @@ class PhysicsCache:
     def fetch_position(self, body, turn):
         return self._snapshots[turn].kinematics[body].position
 
+    def fetch_center_of_mass(self, body, turn):
+        return self._snapshots[turn].kinematics[body].center_of_mass
+
+    def set_center_of_mass(self, body, turn, center_of_mass):
+        snapshot = self._snapshots[turn].kinematics[body]
+        assert(snapshot.center_of_mass == None)
+        snapshot.center_of_mass = center_of_mass
+
     def init_body(self, body, position, velocity):
         self._snapshots[0].record(body, position, velocity)
 

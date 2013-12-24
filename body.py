@@ -35,9 +35,15 @@ class Body:
     satellites/subsatellites/etc.
     '''
     def get_center_of_mass(self, turn):
-        sat_part = sum(sat.get_center_of_mass(turn) * sat.system_mass for sat in self.satellites)
-        own_part = self.get_position(turn) * self.mass
-        return (sat_part + own_part) / self.system_mass
+        if not self.universe.physics_cache.has(turn):
+            self.universe.calculate_physics(turn)
+        com = self.universe.physics_cache.fetch_center_of_mass(self, turn)
+        if (com == None):
+            sat_part = sum(sat.get_center_of_mass(turn) * sat.system_mass for sat in self.satellites)
+            own_part = self.get_position(turn) * self.mass
+            com = (sat_part + own_part) / self.system_mass
+            self.universe.physics_cache.set_center_of_mass(self, turn, com)
+        return com
     center_of_mass = property(lambda self: self.get_center_of_mass(self.universe.time))
 
     def get_system_mass(self):
