@@ -6,7 +6,7 @@ from physics_cache import PhysicsCache
 from time import clock
 
 class Universe:
-    def __init__(self,generator,paused=True,G = 8.648208e-15):
+    def __init__(self,generator=None,paused=True,G = 8.648208e-15):
         self.bodies = []
         self.time = 0
         # gravitational constant is in kilometers cubed per kilogram per turn squared
@@ -64,19 +64,12 @@ class Universe:
                 gravity_sum = 0
                 satellite_gravity_sum = 0
                 for other in self.bodies:
-                    # if the other is body's primary, use other's mass and body's system_mass
-                    if body.primary == other:
-                        component = body.attraction(other, turn-1, True, False)
+                    if body.primary == other or body.primary == other.primary:
+                        component = body.attraction(other, turn-1)
                         gravity_sum += component
                         satellite_gravity_sum += component
-                    # if the other is body's satellite, use other's system_mass and body's mass
                     elif body == other.primary:
-                        gravity_sum += body.attraction(other, turn-1, False, True)
-                    # if we are satellites of the same primary, use system_mass of each
-                    elif body.primary == other.primary:
-                        component = body.attraction(other, turn-1, True, True)
-                        gravity_sum += component
-                        satellite_gravity_sum += component
+                        gravity_sum += body.attraction(other, turn-1)
                     # otherwise, do not calculate an interaction
                 position = body.get_position(turn-1) + body.get_velocity(turn-1)
                 velocity = body.get_velocity(turn-1) + (gravity_sum * self.G)
@@ -86,9 +79,10 @@ class Universe:
 
     def pass_turn(self):
         self.time += 1
-        dev = self.generator.generate_development()
-        if dev:
-            print("Development: %d at t=%d" % (dev,self.time))
+        if self.generator:
+            dev = self.generator.generate_development()
+            if dev:
+                print("Development: %d at t=%d" % (dev,self.time))
         # give the goahead from our side to delete this record
         self.physics_cache.game_loop_finish(self.time - 1)
 
@@ -139,17 +133,18 @@ class Universe:
                     primary = bodyj
             bodyi.primary = primary
 
-    def run(self):
+    def run(self, visible = True):
         self.start_time = clock()
-        ui_t = Thread(target=self.ui_loop)
-        ui_t.start()
-        while not self.view:
-            pass
+        if visible:
+            ui_t = Thread(target=self.ui_loop)
+            ui_t.start()
+            while not self.view:
+                pass
         phys_t = Thread(target=self.physics_cache.loop)
         phys_t.start()
         self.next_turn = clock() + self.seconds_per_turn
         self.running = True
-        while self.view:
+        while self.running:
             while (self.paused or clock() < self.next_turn) and self.view:
                 pass
             if (self.physics_cache.latest <= self.time):

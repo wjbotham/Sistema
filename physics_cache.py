@@ -50,6 +50,8 @@ class PhysicsCache:
 
     def game_loop_finish(self, turn):
         self.loop_finish(turn, lambda x: x.game_loop_finish())
+        if self.universe and not self.universe.view:
+            self.graphics_loop_finish(turn)
 
     def graphics_loop_finish(self, turn):
         self.loop_finish(turn, lambda x: x.graphics_loop_finish())

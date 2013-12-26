@@ -111,17 +111,20 @@ class Body:
 
     This basically returns (acceleration divided by G).
     '''
-    def attraction(self, other, turn, use_self_system_mass=False, use_other_system_mass=False):
+    def attraction(self, other, turn):
         if self == other:
             return 0
+
         self_pos = self.get_position(turn)
-        if use_self_system_mass:
+        if self.primary == other or self.primary == other.primary:
             self_pos = self.get_center_of_mass(turn)
+
         other_mass = other.mass
         other_pos = other.get_position(turn)
-        if use_other_system_mass:
+        if self == other.primary or self.primary == other.primary:
             other_mass = other.system_mass
             other_pos = other.get_center_of_mass(turn)
+        
         rel_pos = other_pos - self_pos
         magnitude = other_mass / (rel_pos*rel_pos)
         unit_vector = rel_pos.normalized
