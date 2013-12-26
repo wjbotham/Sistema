@@ -60,13 +60,14 @@ class PhysicsCache:
     helper function for game_loop_finish and graphics_loop_finish
     '''
     def loop_finish(self, turn, action):
-        while turn in self._snapshots and not self._snapshots[turn].okay_to_delete:
-            try:
+        try:
+            while turn in self._snapshots and not self._snapshots[turn].okay_to_delete:
                 action(self._snapshots[turn])
                 turn -= 1
-            except KeyError:
-                # this happens if the snapshot gets garbage collected at exactly the right time
-                pass
+        except KeyError as e:
+            # this happens if the snapshot gets garbage collected at exactly the wrong time
+            if str(e) != str(turn):
+                raise
 
     def _garbage_collect(self, limit=1):
         _limit = limit
