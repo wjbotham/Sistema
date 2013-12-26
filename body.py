@@ -125,10 +125,12 @@ class Body:
             other_mass = other.system_mass
             other_pos = other.get_center_of_mass(turn)
         
-        rel_pos = other_pos - self_pos
-        magnitude = other_mass / (rel_pos*rel_pos)
-        unit_vector = rel_pos.normalized
-        return unit_vector * magnitude
+        # I would refactor this to be easier to read, but it's the result of a
+        # ton of time optimizations, so enjoy!
+        rel_pos = other_pos.fast_sub(self_pos)
+        distance_squared = rel_pos[0]**2 + rel_pos[1]**2 + rel_pos[2]**2
+        scalar = (other_mass / distance_squared) / sqrt(distance_squared)
+        return Vector(scalar * rel_pos[0], scalar * rel_pos[1], scalar * rel_pos[2])
 
     def angle_phi(self, other, turn):
         rel_pos = self.get_position(turn) - other.get_position(turn)

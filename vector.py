@@ -24,6 +24,8 @@ class Vector:
 
     def __sub__(self,other):
         return Vector(self.x-other.x,self.y-other.y,self.z-other.z)
+    def fast_sub(self,other):
+        return (self.x-other.x, self.y-other.y, self.z-other.z)
 
     def __mul__(self,other):
         c = other.__class__
