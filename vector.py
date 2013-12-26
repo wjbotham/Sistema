@@ -4,8 +4,9 @@ class Vector:
     def __init__(self,x=0,y=0,z=0):
         self.x,self.y,self.z = x,y,z
 
-    def magnitude(self):
+    def get_magnitude(self):
         return sqrt(self * self)
+    magnitude = property(get_magnitude)
 
     def __eq__(self,other):
         if other.__class__ is Vector:
@@ -41,8 +42,9 @@ class Vector:
     def __neg__(self):
         return Vector(-self.x,-self.y,-self.z)
 
-    def normalized(self):
-        return self / self.magnitude()
+    def get_normalized(self):
+        return self / self.magnitude
+    normalized = property(get_normalized)
 
     def coord(self):
         return self.x,self.y,self.z

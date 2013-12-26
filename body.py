@@ -89,13 +89,13 @@ class Body:
 
         # calculate orbit speed
         stan_grav_param = self.universe.G * (self.mass + mass)
-        rel_vel_magnitude = sqrt(stan_grav_param * (2/rel_pos.magnitude() -
+        rel_vel_magnitude = sqrt(stan_grav_param * (2/rel_pos.magnitude -
                                                     1/semimajor_axis))
 
         # calculate orbit direction
         dx = -sin(progression)*semimajor_axis
         dy = cos(progression)*semiminor_axis
-        rel_vel_direction = Vector(dy,dx,0).normalized().rotated(0,incl_angle).rotated(theta,phi-incl_angle)
+        rel_vel_direction = Vector(dy,dx,0).normalized.rotated(0,incl_angle).rotated(theta,phi-incl_angle)
         if reverse_orbit:
             rel_vel_direction = -rel_vel_direction
         
@@ -103,11 +103,19 @@ class Body:
         velocity = self.velocity + rel_vel
         Body(name, mass, density, color, position, velocity, universe=self.universe)
 
+    '''
+    This return value needs to be multiplied by the gravitational constant. (I
+    don't multiply it here because the attraction value can be summed up from
+    many pairwise interactions and THEN multiplied so we can save on a few
+    calculations.)
+
+    This basically returns (acceleration divided by G).
+    '''
     def attraction(self, other, turn, use_self_system_mass=False, use_other_system_mass=False):
-        self_mass = self.mass
+        if self == other:
+            return 0
         self_pos = self.get_position(turn)
         if use_self_system_mass:
-            self_mass = self.system_mass
             self_pos = self.get_center_of_mass(turn)
         other_mass = other.mass
         other_pos = other.get_position(turn)
@@ -115,20 +123,20 @@ class Body:
             other_mass = other.system_mass
             other_pos = other.get_center_of_mass(turn)
         rel_pos = other_pos - self_pos
-        magnitude = (self.universe.G * self_mass * other_mass) / (rel_pos*rel_pos)
-        unit_vector = rel_pos.normalized()
+        magnitude = other_mass / (rel_pos*rel_pos)
+        unit_vector = rel_pos.normalized
         return unit_vector * magnitude
 
     def angle_phi(self, other, turn):
         rel_pos = self.get_position(turn) - other.get_position(turn)
-        unit_vector = rel_pos.normalized()
-        return acos(unit_vector.z/rel_pos.magnitude())/pi
+        unit_vector = rel_pos.normalized
+        return acos(unit_vector.z/rel_pos.magnitude)/pi
 
     def angle_theta(self, other, turn):
-        unit_vector = (self.get_position(turn) - other.get_position(turn)).normalized()
+        unit_vector = (self.get_position(turn) - other.get_position(turn)).normalized
         return atan2(unit_vector.y,unit_vector.x)/pi
 
     def distance(self, other, turn=None):
         if (turn is None):
             turn = self.universe.time
-        return (self.get_position(turn) - other.get_position(turn)).magnitude()
+        return (self.get_position(turn) - other.get_position(turn)).magnitude

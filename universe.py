@@ -58,14 +58,12 @@ class Universe:
     center_of_mass = property(get_center_of_mass)
 
     def calculate_physics(self, turn):
-        if turn < 0:
-            raise Exception("turn="+str(turn)+" - Not supposed to be here!")
         self.physics_cache.acquire(turn)
         if not self.physics_cache.has(turn):
             for body in self.bodies:
                 gravity_sum = 0
                 satellite_gravity_sum = 0
-                for other in (i for i in self.bodies if i != body):
+                for other in self.bodies:
                     # if the other is body's primary, use other's mass and body's system_mass
                     if body.primary == other:
                         component = body.attraction(other, turn-1, True, False)
@@ -80,10 +78,9 @@ class Universe:
                         gravity_sum += component
                         satellite_gravity_sum += component
                     # otherwise, do not calculate an interaction
-                change_in_velocity = gravity_sum / body.mass
                 position = body.get_position(turn-1) + body.get_velocity(turn-1)
-                velocity = body.get_velocity(turn-1) + (gravity_sum / body.mass)
-                sat_accel = satellite_gravity_sum / body.mass
+                velocity = body.get_velocity(turn-1) + (gravity_sum * self.G)
+                sat_accel = satellite_gravity_sum * self.G
                 self.physics_cache.record(turn, body, position, velocity, sat_accel)
         self.physics_cache.release(turn)
 
@@ -96,8 +93,8 @@ class Universe:
         self.physics_cache.game_loop_finish(self.time - 1)
 
     def travel_time(self,b1,b2,accel):
-        velocity_diff = (b1.velocity - b2.velocity).magnitude()
-        distance = (b1.position - b2.position).magnitude()
+        velocity_diff = (b1.velocity - b2.velocity).magnitude
+        distance = (b1.position - b2.position).magnitude
         return ceil((velocity_diff/accel)+(distance/sqrt(accel*distance/4)))
 
     def ui_loop(self):
@@ -122,8 +119,8 @@ class Universe:
         print(sun.name+": mass="+('%.2E' % sun.mass))
         for i in range(1,len(self.bodies)):
             bodyi = self.bodies[i]
-            dist = (self.bodies[0].position - bodyi.position).magnitude()
-            orbit_speed = (self.bodies[0].velocity - bodyi.velocity).magnitude()
+            dist = (self.bodies[0].position - bodyi.position).magnitude
+            orbit_speed = (self.bodies[0].velocity - bodyi.velocity).magnitude
             print(bodyi.name+": dist=("+('%.2E' % dist)+"), orbit speed=("+('%.2E' % orbit_speed)+"), mass="+('%.2E' % bodyi.mass))
         print()
 

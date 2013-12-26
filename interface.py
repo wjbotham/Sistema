@@ -16,7 +16,7 @@ class Interface:
         #create the screen
         self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         self._origin = self.universe.center_of_mass
-        self._km_per_pixel = max((body.position - self.origin).magnitude() for body in self.universe.bodies)*1.25/min(height,width)
+        self._km_per_pixel = max((body.position - self.origin).magnitude for body in self.universe.bodies)*1.25/min(height,width)
 
         self.ui_elements = [ObjectInfoBox(self,100,100)]
         self.grabbed_element = None

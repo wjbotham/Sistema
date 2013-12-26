@@ -10,9 +10,9 @@ class TestVector(unittest.TestCase):
         self.sum_vector = Vector(1+1/sqrt(3), 2+1/sqrt(3), 3+1/sqrt(3))
 
     def test_magnitude(self):
-        self.assertEqual(self.zero_vector.magnitude(), 0)
-        self.assertEqual(self.test_vector.magnitude(), sqrt(14))
-        self.assertEqual(self.unit_vector.magnitude(), 1)
+        self.assertEqual(self.zero_vector.magnitude, 0)
+        self.assertEqual(self.test_vector.magnitude, sqrt(14))
+        self.assertEqual(self.unit_vector.magnitude, 1)
 
     def test_arithmetic(self):
         self.assertEqual(self.zero_vector + self.test_vector, self.test_vector)
