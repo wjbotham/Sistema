@@ -1,6 +1,6 @@
 from math import ceil,sqrt
 from interface import Interface
-from threading import Thread
+from threading import Thread,Lock
 from vector import Vector
 from physics_cache import PhysicsCache
 from time import clock
@@ -15,6 +15,7 @@ class Universe:
         self.view = None
         self._turn_left = 1
         self._paused = paused
+        self.pause_lock = Lock()
         self.generator = generator
         self.sun = None
         self.physics_cache = PhysicsCache(self)
@@ -39,6 +40,7 @@ class Universe:
     def get_paused(self):
         return self._paused
     def set_paused(self, paused):
+        self.pause_lock.acquire()
         # if unpausing
         if self.paused and not paused:
             self.next_turn = clock() + (self._turn_left * self.seconds_per_turn)
@@ -48,6 +50,7 @@ class Universe:
         elif not self.paused and paused:
             self._turn_left = self.turn_left
         self._paused = paused
+        self.pause_lock.release()
     paused = property(get_paused, set_paused)
 
     def get_center_of_mass(self):
