@@ -48,5 +48,5 @@ class TestOrbit(unittest.TestCase):
                 pass
             u.paused = True
             new_distance = u.bodies[0].distance(u.bodies[1])
-            self.assertTrue(starting_distance*0.9 <= new_distance <= starting_distance*1.1)
+            self.assertTrue(starting_distance*0.99999 <= new_distance <= starting_distance*1.00001)
         u.stop()
