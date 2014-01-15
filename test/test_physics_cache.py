@@ -2,8 +2,6 @@ import unittest
 from physics_cache import PhysicsCache
 from time import sleep
 
-catchup_time = 0.1
-
 class TestPhysicsCache(unittest.TestCase):
     def test_latest(self):
         pc = PhysicsCache()
