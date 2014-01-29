@@ -1,4 +1,4 @@
-from physics_snapshot import PhysicsSnapshot
+from physics.snapshot import PhysicsSnapshot
 from threading import Thread
 from time import clock
 

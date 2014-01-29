@@ -1,6 +1,6 @@
 import unittest
 from threading import Thread,ThreadError
-from physics_snapshot import PhysicsSnapshot
+from physics.snapshot import PhysicsSnapshot
 import time
 
 class TestPhysicsSnapshot(unittest.TestCase):

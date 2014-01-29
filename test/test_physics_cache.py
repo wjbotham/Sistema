@@ -1,5 +1,5 @@
 import unittest
-from physics_cache import PhysicsCache
+from physics.cache import PhysicsCache
 from time import sleep
 
 class TestPhysicsCache(unittest.TestCase):

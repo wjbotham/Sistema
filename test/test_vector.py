@@ -1,5 +1,5 @@
 import unittest
-from vector import Vector
+from core.vector import Vector
 from math import sqrt
 
 class TestVector(unittest.TestCase):

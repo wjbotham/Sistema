@@ -1,7 +1,7 @@
 import unittest
 from threading import Thread
-from universe import Universe
-from body import Body
+from core.universe import Universe
+from core.body import Body
 
 class TestOrbit(unittest.TestCase):
     def setUp(self):

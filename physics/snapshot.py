@@ -1,5 +1,5 @@
 from threading import Lock
-from kinematic import Kinematic
+from physics.kinematic import Kinematic
 
 class PhysicsSnapshot:
     def __init__(self):

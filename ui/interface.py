@@ -1,8 +1,8 @@
 import pygame
-from vector import Vector
+from core.vector import Vector
 from math import sqrt,floor
-from ui_element import ObjectInfoBox
-from style import *
+from ui.element import ObjectInfoBox
+from ui.style import *
 from time import clock
 from threading import Thread
 

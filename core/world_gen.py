@@ -1,5 +1,5 @@
-from universe import Universe
-from body import Body
+from core.universe import Universe
+from core.body import Body
 from random import Random
 from math import pi,log
 tau = 2*pi

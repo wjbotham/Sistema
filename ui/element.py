@@ -1,5 +1,5 @@
 import pygame
-from style import *
+from ui.style import *
 
 class UIElement:
     def __init__(self,parent,x,y,width,height,background_color):

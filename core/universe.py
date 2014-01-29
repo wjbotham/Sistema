@@ -1,8 +1,8 @@
 from math import ceil,sqrt
-from interface import Interface
+from ui.interface import Interface
 from threading import Thread,Lock
-from vector import Vector
-from physics_cache import PhysicsCache
+from core.vector import Vector
+from physics.cache import PhysicsCache
 from time import clock
 
 class Universe:

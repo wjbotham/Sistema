@@ -1,4 +1,4 @@
-from vector import Vector
+from core.vector import Vector
 from math import sqrt,cos,sin,acos,pi,atan2
 
 class Body:
