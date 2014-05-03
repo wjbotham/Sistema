@@ -1,6 +1,9 @@
 Sistema
 =======
 
+Dependencies
+------------
+
 Sistema requires pygame (http://www.pygame.org/download.shtml).  On Ubuntu, I used this guide: http://www.pygame.org/wiki/CompileUbuntu?parent=Compilation
 
 If that has moved, these are the commands I ran:
@@ -20,8 +23,11 @@ python3.2 setup.py build
 sudo python3.2 setup.py install
 ```
 
+Sistema will also soon require numpy. On Windows I simply downloaded and ran the Python 3.2 installer found here: http://sourceforge.net/projects/numpy/files/NumPy/1.8.1/
+
+Running
+-------
+
 To run unit tests, `python3.2 -m unittest`.
 
 To run the dev loop, `python3.2 -m main`.
-
-Sistema will also soon require numpy. On Windows I simply downloaded and ran the Python 3.2 installer found here: http://sourceforge.net/projects/numpy/files/NumPy/1.8.1/
