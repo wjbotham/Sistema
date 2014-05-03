@@ -23,3 +23,5 @@ sudo python3.2 setup.py install
 To run unit tests, `python3.2 -m unittest`.
 
 To run the dev loop, `python3.2 -m main`.
+
+Sistema will also soon require numpy. On Windows I simply downloaded and ran the Python 3.2 installer found here: http://sourceforge.net/projects/numpy/files/NumPy/1.8.1/
