@@ -1,6 +1,6 @@
 import pygame
 from core.vector import Vector
-from math import sqrt,floor
+from math import sqrt,floor,ceil
 from ui.element import ObjectInfoBox
 from ui.style import *
 from time import clock
@@ -277,12 +277,52 @@ class Interface:
         visible_y = (-pixel_radius <= pos[1] <= self.height + pixel_radius)
         if not (visible_x and visible_y):
             return
-        pygame.draw.circle(self.window, body.color, pos, pixel_radius, 0)
+
+        body_surface = pygame.Surface((pixel_radius*2,pixel_radius*2), pygame.SRCALPHA)
+
+        if body.universe.sun == body:
+            pygame.draw.circle(body_surface, body.color, (pixel_radius,pixel_radius), pixel_radius, 0)
+        else:
+            shade_color = (body.color[0]*0.5, body.color[1]*0.5, body.color[2]*0.5)
+            pygame.draw.circle(body_surface, shade_color, (pixel_radius,pixel_radius), pixel_radius, 0)
+        
+            diff = body.universe.sun.position - body.position
+            diff = diff / (diff.magnitude / 0.1)
+            shine_pos = (round(pixel_radius*(1+diff.x)),
+                         round(pixel_radius*(1+diff.y)))
+            pygame.draw.circle(body_surface, body.color, shine_pos, round(pixel_radius*.95), 0)
+
+            alpha_array = pygame.surfarray.pixels_alpha(body_surface)
+            for x in range(0,pixel_radius*2):
+                x_component = (x-pixel_radius) ** 2
+                limit = (pixel_radius**2 - x_component) ** 0.5
+                for y in range(0,ceil(pixel_radius-limit)):
+                    #if (x_component + (y-pixel_radius)**2)**0.5 > pixel_radius:
+                    #if y < pixel_radius-limit or y > pixel_radius+limit:
+                    alpha_array[x,y] = 0
+                for y in range(floor(pixel_radius+limit+1),pixel_radius*2):
+                    alpha_array[x,y] = 0
+            del alpha_array
+            '''
+            body_surface.lock()
+            for x in range(0,pixel_radius*2):
+                for y in range(0,pixel_radius*2):
+                    if ((x-pixel_radius)**2 + (y-pixel_radius)**2)**0.5 > pixel_radius*.99:
+                        pixel = body_surface.get_at((x,y))
+                        pixel.a = 0
+                        body_surface.set_at((x,y),pixel)
+            body_surface.unlock()
+            '''
+
+        body_rect = body_surface.get_rect()
+        body_rect.centerx,body_rect.centery = pos
+        self.window.blit(body_surface, body_rect)
+        
         text = FONT.render(body.name, True, LIGHT_GRAY, BLACK)
-        textRect = text.get_rect()
-        textRect.centerx,textRect.centery = pos
-        textRect.centery += 6 + pixel_radius
-        self.window.blit(text, textRect)
+        text_rect = text.get_rect()
+        text_rect.centerx,text_rect.centery = pos
+        text_rect.centery += 6 + pixel_radius
+        self.window.blit(text, text_rect)
 
     def draw_element(self,element):
         self.window.blit(element.surface(), (element.abs_x,element.abs_y))
