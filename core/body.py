@@ -14,6 +14,7 @@ class Body:
         # TODO: make adding/removing satellites (and therefore changing the system mass) happen in property methods
         self.satellites = []
         self._system_mass = mass
+        self.regions = []
 
     def get_primary(self):
         return self._primary
@@ -101,7 +102,7 @@ class Body:
         
         rel_vel = rel_vel_direction * rel_vel_magnitude
         velocity = self.velocity + rel_vel
-        Body(name, mass, density, color, position, velocity, universe=self.universe)
+        return Body(name, mass, density, color, position, velocity, universe=self.universe)
 
     '''
     This return value needs to be multiplied by the gravitational constant. (I

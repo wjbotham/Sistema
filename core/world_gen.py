@@ -1,5 +1,6 @@
 from core.universe import Universe
 from core.body import Body
+from core.region import Region
 from random import Random
 from math import pi,log
 tau = 2*pi
@@ -63,10 +64,11 @@ class WorldGenerator:
         ecc_range = (-6.5,-2)
         theta_range = (-7,-5)
         color = (255,0,0)
-        self.add_object(parent,"RP",mass_range,density_range,sma_range,ecc_range,theta_range,color)
+        planet = self.add_object(parent,"RP",mass_range,density_range,sma_range,ecc_range,theta_range,color)
         idx = len(parent.universe.bodies)-1
         for i in range(self.rng.randint(0,1)):
             self.add_moon(parent.universe.bodies[idx])
+        self.regionify(planet)
 
     #def add_dwarf_planet(self,parent):
         
@@ -77,7 +79,8 @@ class WorldGenerator:
         ecc_range = (-6.5,-2)
         theta_range = (-7,-5)
         color = (255,255,255)
-        self.add_object(parent,"MN",mass_range,density_range,sma_range,ecc_range,theta_range,color)
+        moon = self.add_object(parent,"MN",mass_range,density_range,sma_range,ecc_range,theta_range,color)
+        self.regionify(moon)
 
     def exprange(self,r):
         a,b = r
@@ -94,5 +97,15 @@ class WorldGenerator:
         incl_angle = self.rng.random()*tau
         reverse_orbit = (self.rng.random() < reverse_odds)
         index = list(map(lambda b: b.name[:2], parent.universe.bodies)).count(prefix)+1
-        parent.add_satellite("%s%d"%(prefix,index),mass,density,color,sma,ecc,prog,theta,phi,incl_angle,reverse_orbit)
+        return parent.add_satellite("%s%d"%(prefix,index),mass,density,color,sma,ecc,prog,theta,phi,incl_angle,reverse_orbit)
         
+    def regionify(self, body):
+        region_areas = []
+        remaining_surface_area = round(4 * pi * body.radius ** 2)
+        while remaining_surface_area > 0:
+            region_area = round(sum(self.rng.random() for i in range(4)) * 10000000)
+            if remaining_surface_area < region_area:
+                region_area = remaining_surface_area
+            remaining_surface_area -= region_area
+            region_areas.append(region_area)
+        body.regions = [Region(body,region_area) for region_area in region_areas]

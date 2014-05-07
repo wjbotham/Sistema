@@ -77,18 +77,25 @@ class UIElement:
 
 class ObjectInfoBox(UIElement):
     def __init__(self,parent,x,y,title="Object Info",border_width=1):
-        UIElement.__init__(self,parent,x,y,150,100,DARK_GREEN)
+        UIElement.__init__(self,parent,x,y,160,None,DARK_GREEN)
         self.border_width = border_width
         header = Header(self,title)
         self.children.append(Header(self,title))
         #self.children.append(Button(self,25,25,60,15,DARK_GREEN,BLACK,"Test Button",lambda: print("Click!")))
         def body_info():
             s = self.interface().selected
-            return ["  Name: %s" % s.name,
-                    "  Mass: %.2E kg" % s.mass,
-                    "Radius: %.2E km" % s.radius]
+            labels = ["  Name: %s" % s.name,
+                      "  Mass: %.2E kg" % s.mass,
+                      "Radius: %.2E km" % s.radius]
+            for i in range(len(s.regions)):
+                labels.append((("R"+str(i)+":").rjust(7)+" %.2E km^2") % s.regions[i].area)
+            return labels
         self.children.append(Label(self,0,2+header.height,None,BLACK,body_info))
 
+    def get_height(self):
+        return sum(map(lambda n: n.height, self.children)) + 10
+    height = property(get_height,lambda self,height: None)
+    
     def surface(self):
         s = pygame.Surface((self.width,self.height), pygame.SRCALPHA)
         s.fill(GREEN+(OPACITY,),(0,0,self.width,self.height))
