@@ -1,5 +1,5 @@
 from core.vector import Vector
-from math import sqrt,cos,sin,acos,pi,atan2
+from math import sqrt,cos,sin,acos,pi,atan2,ceil
 
 class Body:
     def __init__(self,name,mass,density,color=(255,255,255),position=None,velocity=None,universe=None):
@@ -150,3 +150,8 @@ class Body:
         if (turn is None):
             turn = self.universe.time
         return (self.get_position(turn) - other.get_position(turn)).magnitude
+
+    def travel_time(self, other, accel):
+        time_from_match = (self.get_velocity(self.universe.time) - other.get_velocity(self.universe.time)).magnitude / accel
+        time_from_travel = (4 * self.distance(other) / accel) ** 0.5
+        return ceil(time_from_match + time_from_travel)

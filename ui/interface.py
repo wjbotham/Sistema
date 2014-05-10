@@ -6,6 +6,25 @@ from ui.style import *
 from time import clock
 from threading import Thread
 
+def cool_time(turns, depth = 4):
+    output = []
+    days = floor(turns / 240)
+    turns -= days * 240
+    if depth >= 1:
+        output.append("%dd" % days)
+    hours = floor(turns / 10)
+    turns -= hours * 10
+    if depth >= 2:
+        output.append("%02dh" % hours)
+    minutes = floor(turns * 6)
+    turns -= minutes / 6
+    if depth >= 3:
+        output.append("%02dm" % minutes)
+    seconds = floor(turns * 360)
+    if depth >= 4:
+        output.append("%02ds" % seconds)
+    return " ".join(output)
+    
 class Interface:
     def __init__(self,universe,width=1000,height=800):
         pygame.init()
@@ -177,7 +196,7 @@ class Interface:
         subject = self.find_subject_body(event)
         if subject:
             if self.selected:
-                print("%.2E" % subject.distance(self.selected))
+                print("%.2E %s" % (subject.distance(self.selected), cool_time(subject.travel_time(self.selected,40))))
                 
     def zoomIn(self):
         # this filter is here so we don't magnify to the point where it breaks,
@@ -216,7 +235,7 @@ class Interface:
         nx = ((x - (self.width  / 2)) * self.km_per_pixel) + ox
         ny = ((y - (self.height / 2)) * self.km_per_pixel) + oy
         return (nx,ny)
-
+        
     def update(self):
         if self.selected:
             x = self.selected.position.x
@@ -232,24 +251,6 @@ class Interface:
         text_list = []
         #text_list.append("%.2E" % self.km_per_pixel)
         turns_since_start = self.universe.time + 1 - self.universe.turn_left
-        def cool_time(turns, depth = 4):
-            output = []
-            days = floor(turns / 240)
-            turns -= days * 240
-            if depth >= 1:
-                output.append("%dd" % days)
-            hours = floor(turns / 10)
-            turns -= hours * 10
-            if depth >= 2:
-                output.append("%02dh" % hours)
-            minutes = floor(turns * 6)
-            turns -= minutes / 6
-            if depth >= 3:
-                output.append("%02dm" % minutes)
-            seconds = floor(turns * 360)
-            if depth >= 4:
-                output.append("%02ds" % seconds)
-            return " ".join(output)
         text_list.append(cool_time(turns_since_start))
         future_cached = self.universe.physics_cache.latest - self.universe.time
         total_cached = self.universe.physics_cache.count
