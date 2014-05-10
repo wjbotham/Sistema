@@ -2,7 +2,11 @@ from core.vector import Vector
 from math import sqrt,cos,sin,acos,pi,atan2
 
 class Body:
-    def __init__(self,name,mass,density,color=(255,255,255),position=Vector(),velocity=Vector(),universe=None):
+    def __init__(self,name,mass,density,color=(255,255,255),position=None,velocity=None,universe=None):
+        if position is None:
+            position = Vector()
+        if velocity is None:
+            velocity = Vector()
         self.name = name
         self.universe = universe
         self.universe.bodies.append(self)
